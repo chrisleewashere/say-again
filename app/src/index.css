@@ -1,0 +1,167 @@
+/* ------------------------------------------------------------------ */
+/* Keep Yapping & Everyone Escapes — design tokens                     */
+/* Spy-noir: deep slate surfaces, amber signal accents. WCAG AA.       */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* surfaces */
+  --bg-0: #0f141a;
+  --bg-1: #171e27;
+  --bg-2: #1f2937;
+  --bg-3: #2a3646;
+  --line: #3b4a5e;
+
+  /* text */
+  --text-hi: #f3f6f9;
+  --text-mid: #b8c4d0;
+  --text-low: #8494a5;
+
+  /* signal accents */
+  --amber: #ffb347;
+  --amber-deep: #e08a00;
+  --success: #4cc38a;
+  --danger: #ff6b6b;
+  --info: #62b6f7;
+
+  /* wire/puzzle palette — color-blind safe pairings; color is NEVER the
+     only channel: every colored element also carries a pattern + label */
+  --w-amber: #ffb347;
+  --w-teal: #2dd4bf;
+  --w-crimson: #f4587a;
+  --w-violet: #a78bfa;
+  --w-silver: #cbd5e1;
+
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+
+  --font-body: 'Avenir Next', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', ui-monospace, Menlo, monospace;
+
+  /* type scale (largeText mode bumps --text-base) */
+  --text-base: 17px;
+
+  /* minimum touch target */
+  --touch: 48px;
+
+  color-scheme: dark;
+}
+
+/* Accessibility modes (toggled by adding classes to <html>) */
+html.a11y-large-text {
+  --text-base: 21px;
+}
+
+html.a11y-dyslexia {
+  --font-body: Verdana, Tahoma, system-ui, sans-serif;
+  letter-spacing: 0.03em;
+  word-spacing: 0.12em;
+}
+
+html.a11y-dyslexia body {
+  line-height: 1.75;
+}
+
+html.a11y-high-contrast {
+  --bg-0: #000000;
+  --bg-1: #0a0a0a;
+  --bg-2: #141414;
+  --bg-3: #1f1f1f;
+  --line: #6b7a8c;
+  --text-hi: #ffffff;
+  --text-mid: #e6ecf2;
+  --text-low: #c2ccd6;
+}
+
+html.a11y-reduced-motion *,
+html.a11y-reduced-motion *::before,
+html.a11y-reduced-motion *::after {
+  animation-duration: 0.001s !important;
+  transition-duration: 0.001s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg-0);
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* iPad: no rubber-band scroll behind the game */
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+#root {
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-height: var(--touch);
+  min-width: var(--touch);
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--amber);
+  border-color: var(--amber-deep);
+  color: #1a1205;
+  font-weight: 700;
+}
+
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
