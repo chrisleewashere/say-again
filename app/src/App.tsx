@@ -1,52 +1,96 @@
-import { useMemo, useState } from 'react';
-import { getModule } from './engine/registry';
-import { hashSeed } from './engine/rng';
-import type { A11ySettings, Difficulty } from './engine/types';
+import { useState } from 'react';
+import { Debrief } from './game/Debrief';
+import { Home } from './game/Home';
+import { HowTo } from './game/HowTo';
+import { MissionRun } from './game/MissionRun';
+import { MissionSetup } from './game/MissionSetup';
+import { Settings } from './game/Settings';
+import { useA11y } from './game/useA11y';
+import { Logbook } from './slp/Logbook';
+import { saveSession, type TallyEvent } from './slp/db';
+import type { MissionConfig, MissionResult } from './engine/types';
 
-const a11y: A11ySettings = {
-  dyslexiaFont: false,
-  highContrast: false,
-  largeText: false,
-  reducedMotion: false,
-};
+type Screen =
+  | { name: 'home' }
+  | { name: 'setup'; replayCode?: string }
+  | { name: 'play'; config: MissionConfig; students: { a: string; b: string } }
+  | { name: 'debrief'; result: MissionResult; config: MissionConfig; students: { a: string; b: string } }
+  | { name: 'logbook' }
+  | { name: 'settings' }
+  | { name: 'howto' };
 
-/**
- * Temporary dev playground — replaced by the real gameplay shell.
- * Renders any registered module at any difficulty with a reroll button.
- */
 function App() {
-  const [difficulty, setDifficulty] = useState<Difficulty>(1);
-  const [nonce, setNonce] = useState(0);
-  const [strikes, setStrikes] = useState(0);
-  const [solved, setSolved] = useState(false);
+  const [screen, setScreen] = useState<Screen>({ name: 'home' });
+  const [a11y, updateA11y] = useA11y();
 
-  const def = getModule('wire-maze');
-  const instance = useMemo(
-    () => def.generate(hashSeed(`dev:${nonce}:${difficulty}`), difficulty),
-    [def, nonce, difficulty],
-  );
+  async function handleFinish(
+    config: MissionConfig,
+    students: { a: string; b: string },
+    result: MissionResult,
+    tallies: TallyEvent[],
+  ) {
+    try {
+      await saveSession({
+        code: result.code,
+        startedAt: result.startedAt,
+        endedAt: result.endedAt,
+        outcome: result.outcome,
+        timerMode: result.timerMode,
+        studentA: students.a,
+        studentB: students.b,
+        modules: result.modules,
+        tallies,
+      });
+    } catch {
+      // storage failure shouldn't block the debrief screen
+    }
+    setScreen({ name: 'debrief', result, config, students });
+  }
 
-  return (
-    <main style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {([1, 2, 3] as Difficulty[]).map((d) => (
-          <button key={d} className={d === difficulty ? 'btn-primary' : ''} onClick={() => { setDifficulty(d); setSolved(false); setStrikes(0); }}>
-            Tier {d}
-          </button>
-        ))}
-        <button onClick={() => { setNonce((n) => n + 1); setSolved(false); setStrikes(0); }}>Reroll</button>
-      </div>
-      <def.Component
-        key={`${nonce}:${difficulty}`}
-        instance={instance}
-        onSolved={() => setSolved(true)}
-        onStrike={() => setStrikes((s) => s + 1)}
-        a11y={a11y}
-        disabled={false}
-      />
-      <p>Strikes: {strikes} {solved ? '— SOLVED' : ''}</p>
-    </main>
-  );
+  switch (screen.name) {
+    case 'home':
+      return (
+        <Home
+          onNewMission={() => setScreen({ name: 'setup' })}
+          onReplayCode={(code) => setScreen({ name: 'setup', replayCode: code })}
+          onLogbook={() => setScreen({ name: 'logbook' })}
+          onSettings={() => setScreen({ name: 'settings' })}
+          onHowTo={() => setScreen({ name: 'howto' })}
+        />
+      );
+    case 'setup':
+      return (
+        <MissionSetup
+          replayCode={screen.replayCode}
+          onStart={(config, students) => setScreen({ name: 'play', config, students })}
+          onBack={() => setScreen({ name: 'home' })}
+        />
+      );
+    case 'play':
+      return (
+        <MissionRun
+          config={screen.config}
+          a11y={a11y}
+          onFinish={(result, tallies) => void handleFinish(screen.config, screen.students, result, tallies)}
+          onAbandon={() => setScreen({ name: 'home' })}
+        />
+      );
+    case 'debrief':
+      return (
+        <Debrief
+          result={screen.result}
+          onReplaySame={() => setScreen({ name: 'play', config: screen.config, students: screen.students })}
+          onNewMission={() => setScreen({ name: 'setup' })}
+          onHome={() => setScreen({ name: 'home' })}
+        />
+      );
+    case 'logbook':
+      return <Logbook onBack={() => setScreen({ name: 'home' })} />;
+    case 'settings':
+      return <Settings a11y={a11y} onChange={updateA11y} onBack={() => setScreen({ name: 'home' })} />;
+    case 'howto':
+      return <HowTo onBack={() => setScreen({ name: 'home' })} />;
+  }
 }
 
 export default App;
