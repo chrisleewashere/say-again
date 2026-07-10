@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc -b",
+    "manual:html": "vite-node scripts/generateManualHtml.ts",
+    "manual:pdf": "node scripts/renderPdf.mjs",
+    "manual": "npm run manual:html && npm run manual:pdf"
   },
   "dependencies": {
     "dexie": "^4.4.4",
@@ -23,6 +28,7 @@
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.1",
+    "vite-node": "^6.0.0",
     "vitest": "^4.1.10"
   }
 }

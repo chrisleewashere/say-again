@@ -1,0 +1,125 @@
+.vault-dial {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.vault-dial-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.25em;
+  letter-spacing: 0.02em;
+}
+
+.vault-dial-sub {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.92em;
+}
+
+.vault-dial-gems {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.vault-dial-gem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  min-width: 96px;
+}
+
+.vault-dial-gem-pos {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--text-low);
+}
+
+.vault-dial-gem-svg {
+  width: 88px;
+  height: 88px;
+}
+
+.vault-dial-size-tag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1px 10px;
+}
+
+.vault-dial-code {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.vault-dial-slot {
+  width: 44px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 1.5em;
+  color: var(--amber);
+}
+
+.vault-dial-slot-filled {
+  border-color: var(--amber-deep);
+}
+
+.vault-dial-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--touch), 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.vault-dial-key {
+  min-height: var(--touch);
+  min-width: var(--touch);
+  font-family: var(--font-mono);
+  font-size: 1.15em;
+}
+
+.vault-dial-key:not(:disabled):active {
+  background: var(--bg-3);
+}
+
+.vault-dial-key-aux {
+  font-size: 0.9em;
+}
+
+.vault-dial-key-enter {
+  background: var(--amber);
+  border-color: var(--amber-deep);
+  color: #1a1205;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+
+.vault-dial-key-enter:not(:disabled):active {
+  background: var(--amber-deep);
+}
+
+.vault-dial-status {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.9em;
+}

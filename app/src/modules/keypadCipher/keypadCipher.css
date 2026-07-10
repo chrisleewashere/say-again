@@ -1,0 +1,95 @@
+.keypad-cipher {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.keypad-cipher-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.keypad-cipher-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.25em;
+  letter-spacing: 0.02em;
+}
+
+.keypad-cipher-sub {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.92em;
+}
+
+.keypad-cipher-vault {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: var(--amber);
+}
+
+.keypad-cipher-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.keypad-cipher-key {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--touch);
+  padding: 12px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  width: 100%;
+}
+
+.keypad-cipher-key:not(:disabled):active {
+  background: var(--bg-3);
+}
+
+.keypad-cipher-key-locked {
+  background: var(--bg-3);
+  border-color: var(--amber);
+  /* locked keys stay readable even though the button is disabled */
+  opacity: 1;
+}
+
+.keypad-cipher-word {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.keypad-cipher-rank {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #1a1205;
+  background: var(--amber);
+  border: 1px solid var(--amber-deep);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.85em;
+}
+
+.keypad-cipher-check {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+.keypad-cipher-status {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.9em;
+}
