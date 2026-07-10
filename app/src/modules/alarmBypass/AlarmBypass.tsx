@@ -84,7 +84,9 @@ export function AlarmBypass({
   const reducedMotion =
     a11y.reducedMotion ||
     (typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('a11y-reduced-motion'));
+      document.documentElement.classList.contains('a11y-reduced-motion')) ||
+    (typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   const sequence = rounds[Math.min(round, totalRounds - 1)];
 

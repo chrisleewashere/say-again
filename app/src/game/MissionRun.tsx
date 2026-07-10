@@ -15,7 +15,6 @@ interface MissionRunProps {
   config: MissionConfig;
   a11y: A11ySettings;
   onFinish: (result: MissionResult, tallies: TallyEvent[]) => void;
-  onAbandon: () => void;
 }
 
 function formatClock(totalSeconds: number): string {
@@ -24,7 +23,7 @@ function formatClock(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProps) {
+export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
   const instances = useMemo(() => instantiateMission(config), [config]);
   const startedAt = useMemo(() => Date.now(), []);
   const [moduleIndex, setModuleIndex] = useState(0);
@@ -32,6 +31,7 @@ export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProp
   const [results, setResults] = useState<ModuleResult[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(config.timer.seconds);
   const [alarmFlash, setAlarmFlash] = useState(false);
+  const [finished, setFinished] = useState(false);
   const tallies = useRef<TallyEvent[]>([]);
   const moduleStartRef = useRef(Date.now());
   const moduleStrikesRef = useRef(0);
@@ -53,7 +53,14 @@ export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProp
   function finish(outcome: MissionResult['outcome'], finalResults: ModuleResult[]) {
     if (finishedRef.current) return;
     finishedRef.current = true;
+    setFinished(true);
     onFinish(buildResult(outcome, finalResults), tallies.current);
+  }
+
+  function endEarly() {
+    if (window.confirm('End this mission early? Progress and tallies will be saved.')) {
+      finish('abandoned', padResults(results));
+    }
   }
 
   /** Mark any unplayed/unfinished modules as unsolved for the record. */
@@ -75,16 +82,18 @@ export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProp
 
   useEffect(() => {
     if (!timed) return;
-    const t = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(t);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(t);
+    // Deadline-based so the clock stays honest across backgrounding, screen
+    // lock, and interval throttling (setInterval alone freezes on iOS).
+    const deadline = startedAt + config.timer.seconds * 1000;
+    const update = () =>
+      setSecondsLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)));
+    update();
+    const t = setInterval(update, 500);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', update);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timed]);
 
@@ -138,12 +147,13 @@ export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProp
   return (
     <main className={`screen run-screen${alarmFlash ? ' run-alarm-flash' : ''}`}>
       <header className="run-header">
-        <button onClick={onAbandon} aria-label="End mission early">End</button>
+        <button onClick={endEarly} aria-label="End mission early">End</button>
         <span className="mission-code">{config.code}</span>
         <span className="run-progress" role="status">
           Puzzle {moduleIndex + 1} of {instances.length}
+          {strikes > 0 ? ` · Alarms: ${strikes} of ${config.maxStrikes}` : ''}
         </span>
-        <span className="run-alarms" aria-label={`${strikes} of ${config.maxStrikes} alarms used`}>
+        <span className="run-alarms" role="img" aria-label={`${strikes} of ${config.maxStrikes} alarms used`}>
           {Array.from({ length: config.maxStrikes }, (_, i) => (
             <svg key={i} viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
               <circle cx="10" cy="10" r="8" fill={i < strikes ? 'var(--danger)' : 'none'} stroke="var(--line)" strokeWidth="2" />
@@ -165,7 +175,7 @@ export function MissionRun({ config, a11y, onFinish, onAbandon }: MissionRunProp
           onSolved={handleSolved}
           onStrike={handleStrike}
           a11y={a11y}
-          disabled={finishedRef.current}
+          disabled={finished}
         />
       </div>
 

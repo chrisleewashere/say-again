@@ -68,12 +68,14 @@ export function VaultDial({
   const { gems } = instance.state;
   const [entry, setEntry] = useState('');
   const [done, setDone] = useState(false);
+  const [rejected, setRejected] = useState(false);
 
   const expected = solveVaultDial(instance.state);
   const codeLength = gems.length;
   const locked = disabled || done;
 
   function pressDigit(d: string) {
+    setRejected(false);
     if (locked || entry.length >= codeLength) return;
     setEntry(entry + d);
   }
@@ -90,6 +92,7 @@ export function VaultDial({
     if (!correct) {
       onStrike();
       setEntry(''); // keypad clears; the vault stays retryable — soft failure
+      setRejected(true);
       return;
     }
     setDone(true);
@@ -99,7 +102,7 @@ export function VaultDial({
   const statusText = done
     ? 'Vault unlocked!'
     : entry.length === 0
-      ? `Keypad empty. Enter the ${codeLength}-digit code.`
+      ? `${rejected ? 'Code rejected — the keypad cleared. ' : ''}Keypad empty. Enter the ${codeLength}-digit code.`
       : `Entered ${entry.split('').join(' ')} — ${entry.length} of ${codeLength} digits.`;
 
   return (

@@ -182,6 +182,7 @@ export function IdCheck({
   const { suspects } = instance.state;
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState(false);
+  const [rejected, setRejected] = useState<number | null>(null);
 
   const contact = solveIdCheck(instance.state);
 
@@ -196,6 +197,7 @@ export function IdCheck({
     onAttempt?.(correct, selected);
     if (!correct) {
       onStrike();
+      setRejected(selected);
       setSelected(null); // lineup unchanged — soft failure, describe and retry
       return;
     }
@@ -207,7 +209,9 @@ export function IdCheck({
     ? `Contact confirmed: suspect ${contact + 1}. Rendezvous secured.`
     : selected !== null
       ? `Suspect ${selected + 1} selected. Press Confirm Contact to commit.`
-      : 'No suspect selected. Describe the lineup to your Handler.';
+      : rejected !== null
+        ? `Suspect ${rejected + 1} is not the contact — the lineup is unchanged. Describe them again and retry.`
+        : 'No suspect selected. Describe the lineup to your Handler.';
 
   return (
     <div className="idcheck card" data-testid="module-id-check">

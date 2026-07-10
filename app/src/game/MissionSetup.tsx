@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { allModules } from '../engine/registry';
+import { findSessionByCode } from '../slp/db';
 import { estimateMinutes, makeTimer, newMissionCode } from '../engine/mission';
 import {
   DIFFICULTY_LABELS,
@@ -29,8 +30,33 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const [maxStrikes, setMaxStrikes] = useState(3);
   const [studentA, setStudentA] = useState('');
   const [studentB, setStudentB] = useState('');
+  const [replayNotice, setReplayNotice] = useState<string | null>(null);
 
   const code = useMemo(() => replayCode ?? newMissionCode(), [replayCode]);
+
+  // A mission code only rebuilds the same puzzles if the module list and
+  // difficulties match too — restore them from the logbook when replaying.
+  useEffect(() => {
+    if (!replayCode) return;
+    let cancelled = false;
+    void findSessionByCode(replayCode).then((session) => {
+      if (cancelled) return;
+      if (!session) {
+        setReplayNotice(
+          `No saved session found for ${replayCode} on this device — rebuild the same puzzle list to get the same mission.`,
+        );
+        return;
+      }
+      setPicked(session.modules.map((m) => ({ moduleId: m.moduleId, difficulty: m.difficulty })));
+      setTimerMode(session.timerMode);
+      setStudentA(session.studentA);
+      setStudentB(session.studentB);
+      setReplayNotice(`Restored the puzzle list from the last ${replayCode} session.`);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [replayCode]);
   const visible = filter === 'all'
     ? modules
     : modules.filter((m) => m.targets.primary === filter || m.targets.secondary.includes(filter));
@@ -64,6 +90,10 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         <h1>Mission Setup</h1>
         <span className="mission-code" aria-label={`Mission code ${code}`}>{code}</span>
       </header>
+
+      {replayNotice && (
+        <p className="setup-replay-notice" role="status">{replayNotice}</p>
+      )}
 
       <section className="card setup-section" aria-labelledby="setup-students">
         <h2 id="setup-students">Team (optional — initials only)</h2>

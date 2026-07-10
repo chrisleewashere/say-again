@@ -179,7 +179,11 @@ export function EscapeRoute({
           className="escape-route-map"
           viewBox={`0 0 ${w} ${h}`}
           role="img"
-          aria-label={`Floor map, ${state.cols} columns (A to ${colLetter(state.cols - 1)}) by ${state.rows} rows (1 to ${state.rows}). ${describe(pos)}`}
+          aria-label={`Floor map, ${state.cols} columns (A to ${colLetter(state.cols - 1)}) by ${state.rows} rows (1 to ${state.rows}). Start at ${state.start}. Exit at ${state.exit}. Landmarks: ${
+            state.landmarks.length
+              ? state.landmarks.map((l) => `${l.kind} at ${l.cell}`).join(', ')
+              : 'none'
+          }. ${describe(pos)}`}
         >
           {/* floor */}
           <rect

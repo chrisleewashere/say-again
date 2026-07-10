@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { deleteSession, recentSessions, sessionsToCsv, type SessionRecord } from './db';
+import { allSessions, deleteSession, recentSessions, sessionsToCsv, type SessionRecord } from './db';
 import './slp.css';
 import '../game/game.css';
 
@@ -20,7 +20,8 @@ export function Logbook({ onBack }: LogbookProps) {
   }, []);
 
   async function exportCsv() {
-    const csv = sessionsToCsv(sessions);
+    // export the FULL table, not just the rows shown on screen
+    const csv = sessionsToCsv(await allSessions());
     const file = new File([csv], `keep-yapping-sessions-${new Date().toISOString().slice(0, 10)}.csv`, {
       type: 'text/csv',
     });
@@ -42,8 +43,9 @@ export function Logbook({ onBack }: LogbookProps) {
     }
   }
 
-  async function remove(id: number | undefined) {
+  async function remove(id: number | undefined, code: string) {
     if (id === undefined) return;
+    if (!window.confirm(`Delete session ${code}? This cannot be undone.`)) return;
     await deleteSession(id);
     await refresh();
   }
@@ -103,7 +105,7 @@ export function Logbook({ onBack }: LogbookProps) {
                     <td>{tallySummary(s, 'A')}</td>
                     <td>{tallySummary(s, 'B')}</td>
                     <td>
-                      <button onClick={() => remove(s.id)} aria-label={`Delete session ${s.code}`}>Delete</button>
+                      <button onClick={() => remove(s.id, s.code)} aria-label={`Delete session ${s.code}`}>Delete</button>
                     </td>
                   </tr>
                 ))}

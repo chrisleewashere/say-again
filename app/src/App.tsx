@@ -30,7 +30,10 @@ function App() {
     tallies: TallyEvent[],
   ) {
     try {
-      await saveSession({
+      // Never let a hung IndexedDB write (seen in WKWebView after
+      // backgrounding) strand players on the run screen.
+      await Promise.race([
+        saveSession({
         code: result.code,
         startedAt: result.startedAt,
         endedAt: result.endedAt,
@@ -40,7 +43,9 @@ function App() {
         studentB: students.b,
         modules: result.modules,
         tallies,
-      });
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('save timeout')), 3000)),
+      ]);
     } catch {
       // storage failure shouldn't block the debrief screen
     }
@@ -72,7 +77,6 @@ function App() {
           config={screen.config}
           a11y={a11y}
           onFinish={(result, tallies) => void handleFinish(screen.config, screen.students, result, tallies)}
-          onAbandon={() => setScreen({ name: 'home' })}
         />
       );
     case 'debrief':

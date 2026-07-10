@@ -88,6 +88,7 @@ function WireRow({
           </>
         )}
       </svg>
+      <span className="wire-color-name" aria-hidden="true">{wire.color}</span>
       <span className="wire-tag" aria-hidden="true">{wire.label}</span>
     </button>
   );
@@ -103,6 +104,7 @@ export function WireMaze({
   const { wires, cutsRequired } = instance.state;
   const [cuts, setCuts] = useState<number[]>([]);
   const [done, setDone] = useState(false);
+  const [wrongWire, setWrongWire] = useState<number | null>(null);
 
   const expected = solveWireMaze(instance.state);
 
@@ -113,9 +115,11 @@ export function WireMaze({
     const correct = expected[step] === index;
     onAttempt?.(correct, nextCuts);
     if (!correct) {
+      setWrongWire(index);
       onStrike();
       return; // wire stays intact on a wrong attempt — soft failure, retry
     }
+    setWrongWire(null);
     setCuts(nextCuts);
     if (nextCuts.length === cutsRequired) {
       setDone(true);
@@ -146,7 +150,9 @@ export function WireMaze({
         ))}
       </div>
       <p className="module-status" role="status">
-        {done ? 'Grid disarmed!' : `Cuts made: ${cuts.length} / ${cutsRequired}`}
+        {done
+          ? 'Grid disarmed!'
+          : `${wrongWire !== null ? `Wrong wire — Wire ${wrongWire + 1} was not safe to cut. The panel is unchanged. ` : ''}Cuts made: ${cuts.length} / ${cutsRequired}`}
       </p>
     </div>
   );

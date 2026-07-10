@@ -75,7 +75,7 @@ test('wrong cuts raise alarms and trip the soft-failure debrief', async ({ page 
   await expect(page.getByRole('button', { name: 'Replay same mission' })).toBeVisible();
 });
 
-test('replaying a mission code rebuilds identical puzzles', async ({ page }) => {
+test('replaying a mission code restores the mission and rebuilds identical puzzles', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'New Mission' }).click();
   await page.getByRole('button', { name: /Add Laser Grid Bypass, Mastermind/ }).click();
@@ -83,16 +83,38 @@ test('replaying a mission code rebuilds identical puzzles', async ({ page }) => 
   const code = await readMissionCode(page);
   const firstWire = await page.locator('.wire-row').first().getAttribute('aria-label');
 
-  // abandon, then replay by code
+  // end early (confirm dialog) — the abandoned session is saved, enabling replay
+  page.once('dialog', (d) => void d.accept());
   await page.getByRole('button', { name: 'End mission early' }).click();
+  await expect(page.getByRole('heading', { name: 'Mission paused' })).toBeVisible();
+  await page.getByRole('button', { name: 'Home' }).click();
+
+  // replay by code: module list + difficulty restore from the logbook
   await page.getByLabel('Replay a mission code').fill(code);
   await page.getByRole('button', { name: 'Load' }).click();
-  await page.getByRole('button', { name: /Add Laser Grid Bypass, Mastermind/ }).click();
+  await expect(page.getByText(`Restored the puzzle list from the last ${code} session.`)).toBeVisible();
+  await expect(page.getByText('This mission (1 puzzle')).toBeVisible();
   await page.getByRole('button', { name: 'Start Mission' }).click();
 
   await expect(page.locator('.run-header .mission-code')).toHaveText(code);
   const replayWire = await page.locator('.wire-row').first().getAttribute('aria-label');
   expect(replayWire).toBe(firstWire);
+});
+
+test('ending a mission early saves the session to the logbook', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New Mission' }).click();
+  await page.getByRole('button', { name: /Add Code Room, Rookie/ }).click();
+  await page.getByRole('button', { name: 'Start Mission' }).click();
+  const code = await readMissionCode(page);
+
+  page.once('dialog', (d) => void d.accept());
+  await page.getByRole('button', { name: 'End mission early' }).click();
+  await expect(page.getByRole('heading', { name: 'Mission paused' })).toBeVisible();
+  await page.getByRole('button', { name: 'Home' }).click();
+  await page.getByRole('button', { name: 'Logbook' }).click();
+  await expect(page.getByText(code)).toBeVisible();
+  await expect(page.getByText('abandoned')).toBeVisible();
 });
 
 test('accessibility settings toggle html classes and persist', async ({ page }) => {

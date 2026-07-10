@@ -118,7 +118,7 @@ export const CARDS: readonly InterceptCard[] = [
     distractors: ['sturdy', 'flexible', 'frantic', 'frozen', 'solid', 'smooth'] },
   { id: 23, clue: 'vacant', relation: 'synonym', tier: 2,
     correctAnswers: ['empty', 'unoccupied'],
-    distractors: ['crowded', 'vast', 'valuable', 'vivid', 'busy', 'open'] },
+    distractors: ['crowded', 'vast', 'valuable', 'vivid', 'busy', 'velvet'] },
   { id: 24, clue: 'ally', relation: 'opposite', tier: 2,
     correctAnswers: ['enemy', 'foe', 'rival', 'opponent'],
     distractors: ['friend', 'partner', 'stranger', 'leader', 'neighbor', 'helper'] },

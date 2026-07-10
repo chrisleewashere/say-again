@@ -57,6 +57,18 @@
   min-width: 0;
 }
 
+.wire-color-name {
+  font-size: 0.72em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 7px;
+  flex-shrink: 0;
+}
+
 .wire-tag {
   font-family: var(--font-mono);
   font-weight: 700;

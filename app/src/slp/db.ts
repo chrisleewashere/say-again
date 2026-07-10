@@ -38,6 +38,9 @@ class KyDatabase extends Dexie {
     this.version(1).stores({
       sessions: '++id, startedAt, studentA, studentB, outcome',
     });
+    this.version(2).stores({
+      sessions: '++id, startedAt, studentA, studentB, outcome, code',
+    });
   }
 }
 
@@ -52,6 +55,17 @@ export async function recentSessions(limit = 100): Promise<SessionRecord[]> {
   return db.sessions.orderBy('startedAt').reverse().limit(limit).toArray();
 }
 
+/** Every session, newest first — used for exports so nothing is silently dropped. */
+export async function allSessions(): Promise<SessionRecord[]> {
+  return db.sessions.orderBy('startedAt').reverse().toArray();
+}
+
+/** Most recent session with a given mission code (for replay-by-code restore). */
+export async function findSessionByCode(code: string): Promise<SessionRecord | undefined> {
+  const matches = await db.sessions.where('code').equals(code).toArray();
+  return matches.sort((a, b) => b.startedAt - a.startedAt)[0];
+}
+
 export async function deleteSession(id: number): Promise<void> {
   await db.sessions.delete(id);
 }
@@ -63,11 +77,13 @@ export async function deleteAllSessions(): Promise<void> {
 /** Flatten sessions to CSV for export into the SLP's own records. */
 export function sessionsToCsv(sessions: SessionRecord[]): string {
   const esc = (v: string | number) => {
-    const s = String(v);
+    let s = String(v);
+    // neutralize spreadsheet formula injection from free-text labels
+    if (/^[=+\-@\t]/.test(s)) s = `'${s}`;
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const header = [
-    'date', 'time', 'mission_code', 'outcome', 'timer_mode', 'student_agent', 'student_handler',
+    'date_iso', 'date_local', 'time_local', 'mission_code', 'outcome', 'timer_mode', 'student_agent', 'student_handler',
     'modules_played', 'modules_solved', 'total_strikes', 'total_hints', 'duration_min',
     'tally_A_correct', 'tally_A_prompted', 'tally_A_incorrect',
     'tally_B_correct', 'tally_B_prompted', 'tally_B_incorrect',
@@ -77,7 +93,7 @@ export function sessionsToCsv(sessions: SessionRecord[]): string {
     const count = (st: 'A' | 'B', r: TallyResult) =>
       s.tallies.filter((t) => t.student === st && t.result === r).length;
     return [
-      d.toLocaleDateString(), d.toLocaleTimeString(), s.code, s.outcome, s.timerMode,
+      d.toISOString(), d.toLocaleDateString(), d.toLocaleTimeString(), s.code, s.outcome, s.timerMode,
       s.studentA, s.studentB,
       s.modules.length,
       s.modules.filter((m) => m.solved).length,

@@ -33,7 +33,7 @@ export const wireMazeManual: ManualSection = {
       {
         kind: 'callout',
         tone: 'tip',
-        text: 'Wires are numbered from the top. Wire numbers never change, even after a cut. Colors can repeat; letter tags never repeat.',
+        text: 'Wires are numbered from the top. Wire numbers never change, even after a cut. Colors can repeat; letter tags never repeat. Each wire also shows its color name printed on it, so the Agent can read the color out loud instead of judging it by eye.',
       },
       { kind: 'h3', text: 'If there are 4 wires' },
       { kind: 'ruleList', caption: 'Check in order; apply the first match.', rules: firstCutRulesText(4, 'standard') },
@@ -66,6 +66,7 @@ export const wireMazeManual: ManualSection = {
           'Wire 1 is at the top.',
           'Wire numbers do not change.',
           'Ask about colors, patterns, and letters.',
+          'The color name is printed on each wire — the Agent can read it out.',
         ],
       },
       { kind: 'h3', text: '4 wires' },

@@ -130,7 +130,14 @@ function renderEdition(editionKey: 'standard' | 'simplified'): string {
   <header class="module-head"><h2>Handler Briefing</h2></header>
   ${briefing}
   <p>${difficultyNote}</p>
-  <div class="callout callout-tip"><span class="callout-tag">TIP</span> Rule lists always go in order from the top. Use the FIRST rule that matches, then stop.</div>
+  ${
+    editionKey === 'standard'
+      ? `<div class="callout callout-tip"><span class="callout-tag">TIP</span> Every rule list runs in order from the top — but read its caption first. Lists captioned
+  &ldquo;apply the first match&rdquo; stop at the first rule that fits. Checklists and step lists (like elimination
+  checklists or &ldquo;apply to every gem&rdquo; rules) work EVERY step, top to bottom, without stopping.</div>`
+      : `<div class="callout callout-tip"><span class="callout-tag">TIP</span> Always go down the list from the top. Read the words above the list first:
+  if it says &ldquo;use the first rule that fits&rdquo;, stop when one fits. If it is a checklist, do every step.</div>`
+  }
 </section>
 
 <section class="module-section">
