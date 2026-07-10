@@ -55,7 +55,7 @@ export function conditionToText(cond: WireCondition, ed: Edition): string {
         ? `If ${cond.op === 'eq' ? 'exactly' : 'at least'} ${cond.n} wires are ${pat(cond.pattern, ed)}`
         : `If ${cond.n} or more wires are ${pat(cond.pattern, ed)}`;
     case 'lastWireColor':
-      return s ? `If the bottom wire is ${cond.color}` : `If the last wire is ${cond.color}`;
+      return s ? `If the bottom wire is ${cond.color}` : `If the bottom wire is ${cond.color}`;
     case 'firstWirePattern':
       return s ? `If the top wire is ${pat(cond.pattern, ed)}` : `If the first wire is ${pat(cond.pattern, ed)}`;
     case 'anyVowelLabel':
@@ -75,13 +75,13 @@ export function actionToText(action: WireAction, ed: Edition): string {
     case 'cutPosition':
       return s ? `cut wire ${action.pos} (counting from the top)` : `cut wire number ${action.pos}`;
     case 'cutLastWire':
-      return s ? 'cut the bottom wire' : 'cut the last wire';
+      return s ? 'cut the bottom wire' : 'cut the bottom wire';
     case 'cutOnlyPattern':
       return s ? `cut the ${pat(action.pattern, ed)} wire` : `cut that ${pat(action.pattern, ed)} wire`;
     case 'cutFirstColor':
       return s ? `cut the first ${action.color} wire from the top` : `cut the first ${action.color} wire`;
     case 'cutLastColor':
-      return s ? `cut the last ${action.color} wire from the top` : `cut the lowest ${action.color} wire`;
+      return s ? `cut the last ${action.color} wire from the top` : `cut the bottom ${action.color} wire`;
     case 'cutFirstVowelLabel':
       return s ? 'cut the first wire with a vowel tag' : 'cut the first wire with a vowel letter';
   }

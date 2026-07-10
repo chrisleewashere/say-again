@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { allModules } from '../engine/registry';
 import { findSessionByCode } from '../slp/db';
 import { estimateMinutes, makeTimer, newMissionCode } from '../engine/mission';
@@ -31,6 +31,9 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const [studentA, setStudentA] = useState('');
   const [studentB, setStudentB] = useState('');
   const [replayNotice, setReplayNotice] = useState<string | null>(null);
+  // Once the user touches the form, a late-arriving replay restore must not
+  // overwrite their edits (IndexedDB reads can lag on iOS).
+  const dirtyRef = useRef(false);
 
   const code = useMemo(() => replayCode ?? newMissionCode(), [replayCode]);
 
@@ -47,8 +50,15 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         );
         return;
       }
+      if (dirtyRef.current) {
+        setReplayNotice(
+          `Found a saved ${replayCode} session, but you already started building — keeping your choices.`,
+        );
+        return;
+      }
       setPicked(session.modules.map((m) => ({ moduleId: m.moduleId, difficulty: m.difficulty })));
       setTimerMode(session.timerMode);
+      setMaxStrikes(session.maxStrikes ?? 3);
       setStudentA(session.studentA);
       setStudentB(session.studentB);
       setReplayNotice(`Restored the puzzle list from the last ${replayCode} session.`);
@@ -63,10 +73,12 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const minutes = estimateMinutes(picked);
 
   function addModule(moduleId: string, difficulty: Difficulty) {
+    dirtyRef.current = true;
     setPicked((p) => [...p, { moduleId, difficulty }]);
   }
 
   function removeAt(i: number) {
+    dirtyRef.current = true;
     setPicked((p) => p.filter((_, idx) => idx !== i));
   }
 
@@ -75,7 +87,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
       {
         code,
         modules: picked,
-        timer: makeTimer(timerMode, picked.length),
+        timer: makeTimer(timerMode, picked),
         maxStrikes,
         hintsAllowed: true,
       },
@@ -100,11 +112,11 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         <div className="setup-students-row">
           <label>
             Field Agent
-            <input value={studentA} onChange={(e) => setStudentA(e.target.value)} maxLength={12} placeholder="e.g. JD" />
+            <input value={studentA} onChange={(e) => { dirtyRef.current = true; setStudentA(e.target.value); }} maxLength={12} placeholder="e.g. JD" />
           </label>
           <label>
             Handler
-            <input value={studentB} onChange={(e) => setStudentB(e.target.value)} maxLength={12} placeholder="e.g. MK" />
+            <input value={studentB} onChange={(e) => { dirtyRef.current = true; setStudentB(e.target.value); }} maxLength={12} placeholder="e.g. MK" />
           </label>
         </div>
       </section>
@@ -172,14 +184,14 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         <h2 id="setup-pace">Pace</h2>
         <div className="filter-row" role="group" aria-label="Timer mode">
           {(['relaxed', 'gentle', 'challenge'] as TimerMode[]).map((m) => (
-            <button key={m} className={`chip${timerMode === m ? ' chip-on' : ''}`} aria-pressed={timerMode === m} onClick={() => setTimerMode(m)}>
+            <button key={m} className={`chip${timerMode === m ? ' chip-on' : ''}`} aria-pressed={timerMode === m} onClick={() => { dirtyRef.current = true; setTimerMode(m); }}>
               {m === 'relaxed' ? 'Relaxed — no timer' : m === 'gentle' ? 'Gentle timer' : 'Challenge timer'}
             </button>
           ))}
         </div>
         <div className="filter-row" role="group" aria-label="Alarm tolerance">
           {[2, 3, 5].map((n) => (
-            <button key={n} className={`chip${maxStrikes === n ? ' chip-on' : ''}`} aria-pressed={maxStrikes === n} onClick={() => setMaxStrikes(n)}>
+            <button key={n} className={`chip${maxStrikes === n ? ' chip-on' : ''}`} aria-pressed={maxStrikes === n} onClick={() => { dirtyRef.current = true; setMaxStrikes(n); }}>
               {n} alarms allowed
             </button>
           ))}

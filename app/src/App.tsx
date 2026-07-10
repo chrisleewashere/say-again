@@ -39,6 +39,7 @@ function App() {
         endedAt: result.endedAt,
         outcome: result.outcome,
         timerMode: result.timerMode,
+        maxStrikes: config.maxStrikes,
         studentA: students.a,
         studentB: students.b,
         modules: result.modules,

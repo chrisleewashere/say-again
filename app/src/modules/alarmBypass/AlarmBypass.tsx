@@ -5,8 +5,10 @@ import { GLYPHS, GLYPH_LETTERS, type Glyph } from './rules';
 import './alarmBypass.css';
 
 /** On-screen display names (shape channel; letters are the second channel). */
+// The easy-read manual calls the crescent "Moon" — say both names so any
+// Handler edition matches what the Agent hears and reads.
 const GLYPH_NAMES: Record<Glyph, string> = {
-  crescent: 'Crescent',
+  crescent: 'Crescent (Moon)',
   key: 'Key',
   bolt: 'Bolt',
   eye: 'Eye',

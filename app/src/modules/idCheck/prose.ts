@@ -115,7 +115,7 @@ export function ruleToText(rule: EliminationRule, ed: Edition): string {
     ? `If ${n} or more suspects remain, check the shirt printed on suspect ${p}'s portrait ` +
         `(even if suspect ${p} is crossed out) and cross out every OTHER suspect with that same shirt pattern.`
     : `Are ${n} or more people left? Look at the shirt on portrait ${p}. ` +
-        `Cross out every other person with that same shirt. (Do not cross out person ${p} for this step.)`;
+        `(Do this even if person ${p} is crossed out.) Cross out each OTHER person who has that same shirt. Never cross out person ${p} in this step.`;
 }
 
 /** Render a full checklist (keyed by lineup size) to ordered prose steps. */

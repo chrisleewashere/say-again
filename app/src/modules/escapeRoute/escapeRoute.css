@@ -130,13 +130,18 @@
   fill: var(--amber);
 }
 
+.escape-route-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .escape-route-compass {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   width: 58px;
   height: 58px;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .escape-route-compass-face {

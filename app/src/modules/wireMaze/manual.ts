@@ -78,7 +78,7 @@ export const wireMazeManual: ManualSection = {
       { kind: 'h3', text: 'Second cut (hard missions only)' },
       {
         kind: 'p',
-        text: 'Hard missions need two cuts. After cut one, use this list. If that wire is already cut, cut the lowest wire that is left.',
+        text: 'Hard missions need two cuts. After cut one, use this list. If that wire is already cut, cut the bottom wire that is left.',
       },
       { kind: 'ruleList', caption: 'Use the first rule that fits.', rules: secondCutRulesText('simplified') },
       { kind: 'callout', tone: 'tip', text: 'Not sure? Ask the Agent to say the wire again. Asking is smart!' },

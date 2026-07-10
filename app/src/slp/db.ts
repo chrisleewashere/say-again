@@ -24,6 +24,8 @@ export interface SessionRecord {
   endedAt: number;
   outcome: MissionOutcome;
   timerMode: TimerMode;
+  /** Alarm tolerance the mission ran with (absent on early records; default 3). */
+  maxStrikes?: number;
   studentA: string;
   studentB: string;
   modules: ModuleResult[];

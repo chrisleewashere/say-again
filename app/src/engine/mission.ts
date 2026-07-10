@@ -9,20 +9,24 @@ import type {
   TimerMode,
 } from './types';
 
-/** Default (generous) timer lengths per mode, scaled by module count. */
-export function defaultTimerSeconds(mode: TimerMode, moduleCount: number): number {
+/**
+ * Timer lengths derive from the same per-module minute estimates the setup
+ * screen shows, so a "~16 min" mission never starts with a 6-minute clock.
+ * Gentle = 1.5x the estimate; challenge = 0.9x.
+ */
+export function defaultTimerSeconds(mode: TimerMode, estimatedMinutes: number): number {
   switch (mode) {
     case 'relaxed':
       return 0;
     case 'gentle':
-      return 240 * moduleCount;
+      return Math.ceil(estimatedMinutes * 60 * 1.5);
     case 'challenge':
-      return 120 * moduleCount;
+      return Math.ceil(estimatedMinutes * 60 * 0.9);
   }
 }
 
-export function makeTimer(mode: TimerMode, moduleCount: number): TimerConfig {
-  return { mode, seconds: defaultTimerSeconds(mode, moduleCount) };
+export function makeTimer(mode: TimerMode, specs: MissionModuleSpec[]): TimerConfig {
+  return { mode, seconds: defaultTimerSeconds(mode, estimateMinutes(specs)) };
 }
 
 export function newMissionCode(): string {

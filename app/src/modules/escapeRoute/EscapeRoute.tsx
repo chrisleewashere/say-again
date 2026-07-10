@@ -169,9 +169,19 @@ export function EscapeRoute({
         <p className="escape-route-sub">
           Your Handler's manual shows this floor's hidden sensors and the safe route. Read them the floor code:
         </p>
-        <p className="escape-route-floorcode" aria-label={`Floor code: floor ${state.floorId}`}>
-          FLOOR {state.floorId}
-        </p>
+        <div className="escape-route-header-row">
+          <p className="escape-route-floorcode" aria-label={`Floor code: floor ${state.floorId}`}>
+            FLOOR {state.floorId}
+          </p>
+          <svg className="escape-route-compass" viewBox="0 0 72 72" role="img" aria-label="Compass rose: north is the top of the map.">
+            <circle cx={36} cy={36} r={24} className="escape-route-compass-face" />
+            <polygon points="36,16 31,40 36,35 41,40" className="escape-route-compass-needle" />
+            <text x={36} y={11} textAnchor="middle" className="escape-route-compass-n">N</text>
+            <text x={36} y={69} textAnchor="middle" className="escape-route-compass-s">S</text>
+            <text x={66} y={40} textAnchor="middle" className="escape-route-compass-s">E</text>
+            <text x={6} y={40} textAnchor="middle" className="escape-route-compass-s">W</text>
+          </svg>
+        </div>
       </header>
 
       <div className="escape-route-maparea">
@@ -291,14 +301,6 @@ export function EscapeRoute({
           </g>
         </svg>
 
-        <svg className="escape-route-compass" viewBox="0 0 72 72" role="img" aria-label="Compass rose: north is the top of the map.">
-          <circle cx={36} cy={36} r={24} className="escape-route-compass-face" />
-          <polygon points="36,16 31,40 36,35 41,40" className="escape-route-compass-needle" />
-          <text x={36} y={11} textAnchor="middle" className="escape-route-compass-n">N</text>
-          <text x={36} y={69} textAnchor="middle" className="escape-route-compass-s">S</text>
-          <text x={66} y={40} textAnchor="middle" className="escape-route-compass-s">E</text>
-          <text x={6} y={40} textAnchor="middle" className="escape-route-compass-s">W</text>
-        </svg>
       </div>
 
       <div className="escape-route-dpad" role="group" aria-label="Movement controls">
