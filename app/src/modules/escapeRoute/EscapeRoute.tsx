@@ -7,7 +7,6 @@ import {
   type EscapeRouteState,
 } from './logic';
 import {
-  cellId,
   colLetter,
   LANDMARK_SHAPES,
   LANDMARK_TAGS,

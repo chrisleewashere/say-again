@@ -1,0 +1,216 @@
+.escape-route {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+
+.escape-route-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.25em;
+  letter-spacing: 0.02em;
+}
+
+.escape-route-sub {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.92em;
+}
+
+.escape-route-floorcode {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 1.35em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  align-self: flex-start;
+  display: inline-block;
+}
+
+.escape-route-maparea {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.escape-route-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.escape-route-floor {
+  fill: var(--bg-1);
+}
+
+.escape-route-floor-tripped {
+  animation: escape-route-flash 0.5s ease-out;
+}
+
+@keyframes escape-route-flash {
+  0% {
+    fill: var(--danger);
+  }
+  100% {
+    fill: var(--bg-1);
+  }
+}
+
+.escape-route-axis {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--text-low);
+}
+
+.escape-route-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.escape-route-border {
+  fill: none;
+  stroke: var(--text-mid);
+  stroke-width: 4;
+}
+
+.escape-route-wall {
+  stroke: var(--amber);
+  stroke-width: 6;
+  stroke-linecap: square;
+}
+
+.escape-route-startpad {
+  fill: none;
+  stroke: var(--text-mid);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+
+.escape-route-marklabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--text-mid);
+}
+
+.escape-route-exit {
+  fill: var(--bg-3);
+  stroke: var(--success);
+  stroke-width: 3;
+}
+
+.escape-route-exitline {
+  stroke: var(--success);
+  stroke-width: 3;
+}
+
+.escape-route-avatar {
+  transition: transform 0.25s ease-out;
+}
+
+.escape-route-avatar-static {
+  transition: none;
+}
+
+.escape-route-avatar-ring {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 3;
+}
+
+.escape-route-avatar-dot {
+  fill: var(--amber);
+}
+
+.escape-route-compass {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 58px;
+  height: 58px;
+  opacity: 0.9;
+}
+
+.escape-route-compass-face {
+  fill: var(--bg-0);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.escape-route-compass-needle {
+  fill: var(--amber);
+}
+
+.escape-route-compass-n {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--amber);
+}
+
+.escape-route-compass-s {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--text-low);
+}
+
+.escape-route-dpad {
+  display: grid;
+  grid-template-areas:
+    '. n .'
+    'w s e';
+  gap: 10px;
+  justify-content: center;
+}
+
+.escape-route-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 84px;
+  min-height: var(--touch);
+  font-family: var(--font-mono);
+  font-size: 1.05em;
+  font-weight: 700;
+  color: var(--text-hi);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.escape-route-btn:not(:disabled):active {
+  background: var(--bg-3);
+}
+
+.escape-route-btn:disabled {
+  opacity: 0.5;
+}
+
+.escape-route-btn-n {
+  grid-area: n;
+}
+.escape-route-btn-w {
+  grid-area: w;
+}
+.escape-route-btn-e {
+  grid-area: e;
+}
+.escape-route-btn-s {
+  grid-area: s;
+}
+
+.escape-route-status {
+  margin: 0;
+  color: var(--text-mid);
+  font-size: 0.9em;
+  min-height: 2.4em;
+}

@@ -1,5 +1,7 @@
 import { registerModule } from '../engine/registry';
 import { alarmBypassModule } from './alarmBypass';
+import { escapeRouteModule } from './escapeRoute';
+import { idCheckModule } from './idCheck';
 import { keypadCipherModule } from './keypadCipher';
 import { passwordInterceptModule } from './passwordIntercept';
 import { vaultDialModule } from './vaultDial';
@@ -20,4 +22,6 @@ export function registerAllModules(): void {
   registerModule(keypadCipherModule);
   registerModule(passwordInterceptModule);
   registerModule(alarmBypassModule);
+  registerModule(escapeRouteModule);
+  registerModule(idCheckModule);
 }
