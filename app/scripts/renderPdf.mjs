@@ -4,7 +4,7 @@
  *   node scripts/renderPdf.mjs
  */
 import { chromium } from '@playwright/test';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,7 +45,16 @@ try {
       printBackground: true,
     });
     await page.close();
-    console.log(`wrote ${resolve(outDir, pdf)}`);
+    // Pin the embedded timestamps so regenerating an unchanged manual never
+    // dirties the tracked PDFs (Chromium writes the current time by default).
+    const out = resolve(outDir, pdf);
+    const buf = readFileSync(out, 'latin1');
+    const pinned = buf.replace(
+      /\/(CreationDate|ModDate) \(D:\d{14}/g,
+      "/$1 (D:20260101000000",
+    );
+    writeFileSync(out, pinned, 'latin1');
+    console.log(`wrote ${out}`);
   }
 } finally {
   await browser.close();
