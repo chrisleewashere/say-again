@@ -1,4 +1,8 @@
 import { registerModule } from '../engine/registry';
+import { alarmBypassModule } from './alarmBypass';
+import { keypadCipherModule } from './keypadCipher';
+import { passwordInterceptModule } from './passwordIntercept';
+import { vaultDialModule } from './vaultDial';
 import { wireMazeModule } from './wireMaze';
 
 /**
@@ -12,4 +16,8 @@ export function registerAllModules(): void {
   if (registered) return;
   registered = true;
   registerModule(wireMazeModule);
+  registerModule(vaultDialModule);
+  registerModule(keypadCipherModule);
+  registerModule(passwordInterceptModule);
+  registerModule(alarmBypassModule);
 }
