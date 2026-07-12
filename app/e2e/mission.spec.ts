@@ -83,9 +83,9 @@ test('replaying a mission code restores the mission and rebuilds identical puzzl
   const code = await readMissionCode(page);
   const firstWire = await page.locator('.wire-row').first().getAttribute('aria-label');
 
-  // end early (confirm dialog) — the abandoned session is saved, enabling replay
-  page.once('dialog', (d) => void d.accept());
+  // end early (two-tap confirm) — the abandoned session is saved, enabling replay
   await page.getByRole('button', { name: 'End mission early' }).click();
+  await page.getByRole('button', { name: /Tap again to end the mission/ }).click();
   await expect(page.getByRole('heading', { name: 'Mission paused' })).toBeVisible();
   await page.getByRole('button', { name: 'Home' }).click();
 
@@ -108,8 +108,8 @@ test('ending a mission early saves the session to the logbook', async ({ page })
   await page.getByRole('button', { name: 'Start Mission' }).click();
   const code = await readMissionCode(page);
 
-  page.once('dialog', (d) => void d.accept());
   await page.getByRole('button', { name: 'End mission early' }).click();
+  await page.getByRole('button', { name: /Tap again to end the mission/ }).click();
   await expect(page.getByRole('heading', { name: 'Mission paused' })).toBeVisible();
   await page.getByRole('button', { name: 'Home' }).click();
   await page.getByRole('button', { name: 'Logbook' }).click();

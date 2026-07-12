@@ -10,6 +10,7 @@ interface LogbookProps {
 export function Logbook({ onBack }: LogbookProps) {
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
   const [exported, setExported] = useState(false);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
 
   async function refresh() {
     setSessions(await recentSessions());
@@ -43,9 +44,16 @@ export function Logbook({ onBack }: LogbookProps) {
     }
   }
 
-  async function remove(id: number | undefined, code: string) {
+  // Two-tap confirm — native confirm dialogs are unreliable in sandboxed
+  // webviews, and tapping the same button twice is clearer on a tablet.
+  async function remove(id: number | undefined) {
     if (id === undefined) return;
-    if (!window.confirm(`Delete session ${code}? This cannot be undone.`)) return;
+    if (confirmingId !== id) {
+      setConfirmingId(id);
+      setTimeout(() => setConfirmingId((c) => (c === id ? null : c)), 3500);
+      return;
+    }
+    setConfirmingId(null);
     await deleteSession(id);
     await refresh();
   }
@@ -105,7 +113,13 @@ export function Logbook({ onBack }: LogbookProps) {
                     <td>{tallySummary(s, 'A')}</td>
                     <td>{tallySummary(s, 'B')}</td>
                     <td>
-                      <button onClick={() => remove(s.id, s.code)} aria-label={`Delete session ${s.code}`}>Delete</button>
+                      <button
+                        onClick={() => remove(s.id)}
+                        className={confirmingId === s.id ? 'btn-primary' : ''}
+                        aria-label={confirmingId === s.id ? `Tap again to permanently delete session ${s.code}` : `Delete session ${s.code}`}
+                      >
+                        {confirmingId === s.id ? 'Delete? Tap again' : 'Delete'}
+                      </button>
                     </td>
                   </tr>
                 ))}

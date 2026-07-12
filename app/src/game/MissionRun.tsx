@@ -32,6 +32,8 @@ export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
   const [secondsLeft, setSecondsLeft] = useState(config.timer.seconds);
   const [alarmFlash, setAlarmFlash] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [endConfirm, setEndConfirm] = useState(false);
+  const endConfirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tallies = useRef<TallyEvent[]>([]);
   const moduleStartRef = useRef(Date.now());
   const moduleStrikesRef = useRef(0);
@@ -57,10 +59,17 @@ export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
     onFinish(buildResult(outcome, finalResults), tallies.current);
   }
 
+  // Two-tap confirm (native confirm dialogs are unreliable in sandboxed
+  // webviews, and an in-app confirm reads better anyway).
   function endEarly() {
-    if (window.confirm('End this mission early? Progress and tallies will be saved.')) {
-      finish('abandoned', padResults(results));
+    if (!endConfirm) {
+      setEndConfirm(true);
+      if (endConfirmTimer.current) clearTimeout(endConfirmTimer.current);
+      endConfirmTimer.current = setTimeout(() => setEndConfirm(false), 3500);
+      return;
     }
+    if (endConfirmTimer.current) clearTimeout(endConfirmTimer.current);
+    finish('abandoned', padResults(results));
   }
 
   /** Mark any unplayed/unfinished modules as unsolved for the record. */
@@ -147,7 +156,13 @@ export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
   return (
     <main className={`screen run-screen${alarmFlash ? ' run-alarm-flash' : ''}`}>
       <header className="run-header">
-        <button onClick={endEarly} aria-label="End mission early">End</button>
+        <button
+          onClick={endEarly}
+          className={endConfirm ? 'btn-primary' : ''}
+          aria-label={endConfirm ? 'Tap again to end the mission; progress and tallies will be saved' : 'End mission early'}
+        >
+          {endConfirm ? 'End now? Tap again' : 'End'}
+        </button>
         <span className="mission-code">{config.code}</span>
         <span className="run-progress" role="status">
           Puzzle {moduleIndex + 1} of {instances.length}
