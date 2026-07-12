@@ -64,33 +64,42 @@ self.addEventListener('fetch', (event) => {
   // ignoreVary: precached entries (fetched without an Origin header) must
   // still satisfy crossorigin <script>/<link> requests when the server sends
   // `Vary: Origin` on assets.
+  const cachePut = (response) => {
+    if (response.ok && response.type === 'basic') {
+      const copy = response.clone();
+      caches
+        .open(CACHE_NAME)
+        .then((cache) => cache.put(request, copy))
+        .catch(() => {
+          /* storage full or unavailable — serving still works */
+        });
+    }
+    return response;
+  };
+
+  // Navigations (and the shell itself) go NETWORK-FIRST so a new deploy
+  // reaches returning users without a manual cache bump; hashed /assets/*
+  // stay cache-first below.
+  if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
+    event.respondWith(
+      fetch(request)
+        .then(cachePut)
+        .catch(() =>
+          caches.match(request, { ignoreVary: true }).then(
+            (cached) => cached ?? caches.match('/index.html', { ignoreVary: true }).then((shell) => {
+              if (shell) return shell;
+              throw new Error('offline with empty cache');
+            }),
+          ),
+        ),
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(request, { ignoreVary: true }).then((cached) => {
       if (cached) return cached;
-      return fetch(request)
-        .then((response) => {
-          // Cache successful basic (same-origin) responses for offline use.
-          if (response.ok && response.type === 'basic') {
-            const copy = response.clone();
-            caches
-              .open(CACHE_NAME)
-              .then((cache) => cache.put(request, copy))
-              .catch(() => {
-                /* storage full or unavailable — serving still works */
-              });
-          }
-          return response;
-        })
-        .catch((err) => {
-          // Offline navigation: fall back to the cached app shell.
-          if (request.mode === 'navigate') {
-            return caches.match('/index.html', { ignoreVary: true }).then((shell) => {
-              if (shell) return shell;
-              throw err;
-            });
-          }
-          throw err;
-        });
+      return fetch(request).then(cachePut);
     }),
   );
 });

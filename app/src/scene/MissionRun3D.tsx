@@ -3,11 +3,12 @@
  * useMissionRunner hook), presented as an opened analog spycraft briefcase
  * with the mission's modules racked on it.
  */
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { playSfx } from '../audio/useSfx';
+import { useQuality } from '../quality/useQuality';
 import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types';
 import { MissionHeader } from '../game/MissionRun';
 import { useMissionRunner } from '../game/useMissionRunner';
@@ -19,6 +20,12 @@ import { Faceplate, type BayState } from './Faceplate';
 import { FieldCase } from './FieldCase';
 import { baySlots, OVERVIEW_CAMERA } from './layout';
 import './scene.css';
+
+/** Feeds real frame timestamps to the auto quality ladder. */
+function QualityFrameBridge({ recordFrame }: { recordFrame: (t: number) => void }) {
+  useFrame(() => recordFrame(performance.now()));
+  return null;
+}
 
 /** Procedural neutral studio environment — zero network fetches. */
 function StudioEnvironment() {
@@ -42,7 +49,12 @@ function useOpenAmount(reducedMotion: boolean): number {
   const [amount, setAmount] = useState(reducedMotion ? 1 : 0);
   const raf = useRef(0);
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion) {
+      // skip only the animation — the audio ritual still plays
+      playSfx('latchOpen');
+      playSfx('lampWarm');
+      return;
+    }
     playSfx('latchOpen');
     const start = performance.now() + 350; // beat of stillness before the latch
     const dur = 1400;
@@ -77,6 +89,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   );
   const runner = useMissionRunner(config, finishWithSfx);
   useMissionSfx(runner);
+  const quality = useQuality();
   const [zoomed, setZoomed] = useState<{ index: number; pose: CameraPose } | null>(null);
   const poseGetters = useRef(new Map<number, () => CameraPose | null>());
   const slots = useMemo(() => baySlots(runner.instances.length), [runner.instances.length]);
@@ -128,7 +141,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     : null;
 
   return (
-    <main className={`scene-screen${runner.alarmFlash ? ' scene-alarm-flash' : ''}`}>
+    <main className="scene-screen">
       <div className="scene-chrome scene-chrome-top">
         <MissionHeader config={config} runner={runner} />
       </div>
@@ -136,13 +149,20 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       <Canvas
         className="scene-canvas"
         camera={{ position: OVERVIEW_CAMERA.position, fov: 42 }}
-        dpr={[1, 2]}
-        shadows
+        dpr={quality.tier === 'high' ? [1, 2] : quality.tier === 'medium' ? [1, 1.5] : 1}
+        shadows={quality.features.shadows}
       >
-        <StudioEnvironment />
-        <ambientLight intensity={0.25} color="#3a4250" />
+        <QualityFrameBridge recordFrame={quality.recordFrame} />
+        {quality.features.reflections && <StudioEnvironment />}
+        <ambientLight intensity={quality.features.reflections ? 0.25 : 0.55} color="#3a4250" />
         {/* warm desk-lamp key */}
-        <directionalLight position={[3.5, 6, 4]} intensity={1.15} color="#ffd9a0" castShadow shadow-mapSize={[1024, 1024]} />
+        <directionalLight
+          position={[3.5, 6, 4]}
+          intensity={quality.features.reflections ? 1.15 : 1.5}
+          color="#ffd9a0"
+          castShadow={quality.features.shadows}
+          shadow-mapSize={[1024, 1024]}
+        />
         {/* cool dim fill */}
         <directionalLight position={[-4, 3, -2]} intensity={0.3} color="#7f9ac2" />
 
@@ -163,6 +183,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
 
         <CameraRig zoomPose={zoomed?.pose ?? null} reducedMotion={reducedMotion} />
       </Canvas>
+
+      {runner.alarmFlash && <div className="scene-flash-overlay" aria-hidden="true" />}
 
       <div className="scene-chrome scene-chrome-bottom">
         {zoomed ? (

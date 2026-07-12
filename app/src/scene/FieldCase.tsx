@@ -132,7 +132,7 @@ export function FieldCase({ openAmount, strikes, maxStrikes, alarmFlash, baseChi
               <planeGeometry args={[CASE_W - 0.36, CASE_D - 0.36]} />
             </mesh>
             {/* brass mission plate riveted inside the lid, low edge */}
-            <group position={[0, -LID_H / 2 - 0.03, CASE_D / 2 - 0.35]}>
+            <group position={[0, -LID_H / 2 - 0.03, 0.1]}>
               <RoundedBox args={[1.5, 0.03, 0.42]} radius={0.01} material={BRASS} />
             </group>
           </group>

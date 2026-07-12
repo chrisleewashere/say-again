@@ -119,6 +119,10 @@ export function playSfx(cue: SfxCueName): void {
   if (prefs.muted) return;
   const audio = ensureAudio();
   if (!audio || audio.ctx.state === 'closed') return;
+  // While the context is suspended (iOS before the first user gesture),
+  // scheduling would queue cues at a frozen currentTime and burst them all
+  // out on the first tap — drop the cue instead.
+  if (audio.ctx.state === 'suspended') return;
   try {
     SFX_CUES[cue](audio.ctx, audio.master);
   } catch {

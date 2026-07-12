@@ -76,9 +76,11 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
     : modules.filter((m) => m.targets.primary === filter || m.targets.secondary.includes(filter));
   const minutes = estimateMinutes(picked);
 
+  const CASE_CAPACITY = 6;
+
   function addModule(moduleId: string, difficulty: Difficulty) {
     configDirtyRef.current = true;
-    setPicked((p) => [...p, { moduleId, difficulty }]);
+    setPicked((p) => (p.length >= CASE_CAPACITY ? p : [...p, { moduleId, difficulty }]));
   }
 
   function removeAt(i: number) {
@@ -155,7 +157,12 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
               </div>
               <div className="module-card-add" role="group" aria-label={`Add ${m.codename} at a difficulty`}>
                 {([1, 2, 3] as Difficulty[]).map((d) => (
-                  <button key={d} onClick={() => addModule(m.id, d)} aria-label={`Add ${m.codename}, ${DIFFICULTY_LABELS[d]} difficulty, about ${m.minutes[d]} minutes`}>
+                  <button
+                    key={d}
+                    onClick={() => addModule(m.id, d)}
+                    disabled={picked.length >= CASE_CAPACITY}
+                    aria-label={`Add ${m.codename}, ${DIFFICULTY_LABELS[d]} difficulty, about ${m.minutes[d]} minutes`}
+                  >
                     + {DIFFICULTY_LABELS[d]}
                   </button>
                 ))}
@@ -167,6 +174,9 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
 
       <section className="card setup-section" aria-labelledby="setup-picked">
         <h2 id="setup-picked">This mission ({picked.length} puzzle{picked.length === 1 ? '' : 's'}, ~{minutes} min)</h2>
+        {picked.length >= CASE_CAPACITY && (
+          <p className="setup-empty">The field case holds {CASE_CAPACITY} modules — remove one to swap in another.</p>
+        )}
         {picked.length === 0 ? (
           <p className="setup-empty">Add puzzles above. For a ~20 minute session, 2–3 puzzles works well.</p>
         ) : (

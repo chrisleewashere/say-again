@@ -82,7 +82,7 @@ function App() {
     case 'play': {
       const onFinish = (result: MissionResult, tallies: TallyEvent[]) =>
         void handleFinish(screen.config, screen.students, result, tallies);
-      if (sceneMode === '3d') {
+      if (sceneMode === '3d' && screen.config.modules.length <= 6) {
         return (
           <Suspense fallback={<main className="screen home-screen"><p className="home-sub">Unpacking the field case…</p></main>}>
             <MissionRun3D config={screen.config} a11y={a11y} onFinish={onFinish} />

@@ -47,7 +47,7 @@ export function baySlots(count: number): BaySlot[] {
   // closed). Plates sit slightly proud of that surface.
   for (const x of centered(lidCount)) {
     slots.push({
-      position: [x, -0.05, 0.55],
+      position: [x, -0.05, 0.9],
       rotation: [Math.PI / 2, 0, 0],
       parent: 'lid',
     });

@@ -6,7 +6,7 @@
  * distant plates can't be mis-tapped.
  */
 import { Html, RoundedBox } from '@react-three/drei';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { ModuleComponentProps, PuzzleInstance } from '../engine/types';
 import { getModule } from '../engine/registry';
@@ -33,10 +33,29 @@ interface FaceplateProps {
 const worldPos = new THREE.Vector3();
 const worldQuat = new THREE.Quaternion();
 const worldNormal = new THREE.Vector3();
+const worldUp = new THREE.Vector3();
 
 export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPoseGetter, moduleProps }: FaceplateProps) {
   const def = getModule(instance.moduleId);
   const groupRef = useRef<THREE.Group>(null);
+  const fitRef = useRef<HTMLDivElement>(null);
+  const [fitScale, setFitScale] = useState(1);
+
+  // Tall modules (keypads, maps) scale down to fit the plate instead of
+  // clipping; transform doesn't affect layout size, so measurement is stable.
+  useLayoutEffect(() => {
+    const el = fitRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const AVAILABLE = 545;
+    const measure = () => {
+      const natural = el.scrollHeight;
+      setFitScale(Math.min(1, AVAILABLE / Math.max(1, natural)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [state]);
   const s = PLATE_SIZE;
   const screwOff = s / 2 + 0.02;
   const interactive = zoomed && state === 'active';
@@ -46,12 +65,14 @@ export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPos
     if (!g) return null;
     g.getWorldPosition(worldPos);
     g.getWorldQuaternion(worldQuat);
-    // plate content faces +Z in slot-local space
+    // plate content faces +Z, reads upward along +Y in slot-local space
     worldNormal.set(0, 0, 1).applyQuaternion(worldQuat);
-    return zoomPoseFromWorld(
+    worldUp.set(0, 1, 0).applyQuaternion(worldQuat);
+    const pose = zoomPoseFromWorld(
       [worldPos.x, worldPos.y, worldPos.z],
       [worldNormal.x, worldNormal.y, worldNormal.z],
     );
+    return { ...pose, up: [worldUp.x, worldUp.y, worldUp.z] as [number, number, number] };
   }
 
   registerPoseGetter?.(computePose);
@@ -113,7 +134,9 @@ export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPos
               <p>Sealed — finish the lit module first.</p>
             </div>
           ) : (
-            <def.Component instance={instance} {...moduleProps} disabled={moduleProps.disabled || !interactive} />
+            <div ref={fitRef} className="faceplate-fit" style={{ transform: `scale(${fitScale})` }}>
+              <def.Component instance={instance} {...moduleProps} disabled={moduleProps.disabled || !interactive} />
+            </div>
           )}
         </div>
       </Html>
