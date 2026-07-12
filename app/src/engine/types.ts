@@ -120,6 +120,17 @@ export interface ModuleDefinition<S = unknown, A = unknown> {
   validate(state: S, answer: A): boolean;
   Component: React.ComponentType<ModuleComponentProps<S, A>>;
   manual: ManualSection;
+  /**
+   * Optional descriptor for how the module mounts into the 3D Field Case rack.
+   * Omit it (or omit any field) and the module gets the standard mount:
+   * `slots: 1` (single rack slot) and `bezel: 'standard'`. `slots: 2` requests
+   * a double-wide slot; `bezel` picks the panel profile ('deep' = recessed,
+   * 'flush' = level with the rack). This is purely declarative — the shell
+   * renders every module from it automatically, so adding a module never
+   * requires 3D work. Custom in-scene 3D presentation is a separate opt-in
+   * that may be added later; no 3D types belong here.
+   */
+  faceplate?: { slots?: 1 | 2; bezel?: 'standard' | 'deep' | 'flush' };
 }
 
 /* ------------------------------------------------------------------ */

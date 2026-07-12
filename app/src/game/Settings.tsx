@@ -1,9 +1,15 @@
 import type { A11ySettings } from '../engine/types';
+import { QualitySetting } from '../quality/QualitySetting';
+import { SceneModeSetting } from '../scene/SceneModeSetting';
+import type { SceneModePreference } from '../scene/useSceneMode';
+import { useSfx } from '../audio/useSfx';
 import './game.css';
 
 interface SettingsProps {
   a11y: A11ySettings;
   onChange: (patch: Partial<A11ySettings>) => void;
+  scenePref: SceneModePreference;
+  onSceneChange: (p: SceneModePreference) => void;
   onBack: () => void;
 }
 
@@ -14,7 +20,10 @@ const OPTIONS: { key: keyof A11ySettings; label: string; hint: string }[] = [
   { key: 'reducedMotion', label: 'Reduce motion', hint: 'Skips flashing and movement effects.' },
 ];
 
-export function Settings({ a11y, onChange, onBack }: SettingsProps) {
+export function Settings({ a11y, onChange, scenePref, onSceneChange, onBack }: SettingsProps) {
+  const sfx = useSfx();
+  const volumePercent = Math.round(sfx.volume * 100);
+
   return (
     <main className="screen">
       <header className="screen-header">
@@ -44,6 +53,57 @@ export function Settings({ a11y, onChange, onBack }: SettingsProps) {
           ))}
         </ul>
       </section>
+
+      <section className="card setup-section" aria-labelledby="settings-sound">
+        <h2 id="settings-sound">Sound</h2>
+        <ul className="module-list">
+          <li className="module-card">
+            <div className="module-card-info">
+              <strong>Sound effects</strong>
+              <p>Latches, dials, and lamp pings. Failure sounds always stay soft.</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={!sfx.muted}
+              aria-label="Sound effects"
+              className={!sfx.muted ? 'btn-primary' : ''}
+              onClick={() => {
+                const nowMuted = !sfx.muted;
+                sfx.setMuted(nowMuted);
+                if (!nowMuted) sfx.play('buttonPress');
+              }}
+            >
+              {sfx.muted ? 'Off' : 'On'}
+            </button>
+          </li>
+          <li className="module-card">
+            <div className="module-card-info">
+              <strong>
+                <label htmlFor="settings-sfx-volume">Volume</label>
+              </strong>
+              <p>How loud sound effects play.</p>
+            </div>
+            <input
+              id="settings-sfx-volume"
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={volumePercent}
+              disabled={sfx.muted}
+              aria-valuetext={`${volumePercent}%`}
+              onChange={(e) => sfx.setVolume(Number(e.currentTarget.value) / 100)}
+              onPointerUp={() => sfx.play('dialDetent')}
+              onKeyUp={() => sfx.play('dialDetent')}
+            />
+            <span aria-hidden="true">{volumePercent}%</span>
+          </li>
+        </ul>
+      </section>
+
+      <SceneModeSetting pref={scenePref} onChange={onSceneChange} />
+
+      <QualitySetting />
 
       <section className="card setup-section">
         <h2>Privacy</h2>

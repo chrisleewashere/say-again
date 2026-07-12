@@ -7,6 +7,11 @@ import { generateWireMaze, solveWireMaze } from '../src/modules/wireMaze/logic';
  * solver to pick correct wires) -> debrief -> logbook shows the session.
  */
 
+// These specs exercise the classic 2D shell; the Field Case has its own spec.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('ky-scene-mode', '2d'));
+});
+
 async function readMissionCode(page: Page): Promise<string> {
   const text = await page.locator('.run-header .mission-code').textContent();
   expect(text).toMatch(/^[A-Z]{3}-\d{3}$/);

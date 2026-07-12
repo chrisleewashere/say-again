@@ -1,0 +1,137 @@
+.scene-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, #151b23 0%, #0a0d11 70%);
+  overflow: hidden;
+}
+
+.scene-canvas {
+  position: absolute !important;
+  inset: 0;
+  touch-action: none;
+}
+
+.scene-chrome {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 14px 18px;
+  pointer-events: none;
+}
+
+.scene-chrome > * {
+  pointer-events: auto;
+}
+
+.scene-chrome-top {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(10, 13, 17, 0.9), transparent);
+}
+
+.scene-chrome-bottom {
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 20px;
+  background: linear-gradient(to top, rgba(10, 13, 17, 0.85), transparent);
+}
+
+.scene-hint {
+  margin: 0;
+  color: var(--text-low);
+  font-size: 0.9em;
+  letter-spacing: 0.03em;
+}
+
+.scene-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.scene-open-btn {
+  background: var(--bg-2);
+  border-color: var(--amber-deep);
+}
+
+.scene-back-btn {
+  background: var(--bg-2);
+  border-color: var(--amber-deep);
+}
+
+.scene-alarm-flash {
+  animation: scene-alarm-pulse 0.7s ease-out 1;
+}
+
+@keyframes scene-alarm-pulse {
+  0% { box-shadow: inset 0 0 0 0 rgba(255, 90, 90, 0); }
+  25% { box-shadow: inset 0 0 120px 30px rgba(255, 90, 90, 0.25); }
+  100% { box-shadow: inset 0 0 0 0 rgba(255, 90, 90, 0); }
+}
+
+/* ---------- faceplate DOM (rendered in 3D via Html transform) ---------- */
+/* drei's outer transform wrapper must never intercept canvas drags */
+.faceplate-wrap,
+.faceplate-wrap * {
+  pointer-events: none;
+}
+
+.faceplate-wrap .faceplate-live,
+.faceplate-wrap .faceplate-live * {
+  pointer-events: auto;
+}
+
+.faceplate-content {
+  width: 620px;
+  height: 620px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #16130f;
+}
+
+.faceplate-content .card {
+  box-shadow: none;
+  border-color: #3a332b;
+  background: #1b1712;
+  max-height: 545px;
+  overflow-y: auto;
+  transform-origin: center;
+}
+
+.faceplate-tag {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.35em;
+  color: #8a7a5c;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+  padding-top: 6px;
+}
+
+.faceplate-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #5b6675;
+  font-size: 18px;
+  text-align: center;
+  padding: 0 40px;
+}
+
+/* dim non-active plates slightly so the lit one reads */
+.faceplate-locked,
+[data-bay-state='locked'] {
+  opacity: 0.75;
+}
+
+[data-bay-state='solved'] .card {
+  opacity: 0.55;
+}
