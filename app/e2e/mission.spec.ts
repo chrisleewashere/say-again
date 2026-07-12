@@ -47,7 +47,7 @@ test('full wire-maze mission: setup, solve, debrief, logbook', async ({ page }) 
       .click();
   }
 
-  await expect(page.getByRole('heading', { name: 'Mission accomplished!' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Mission grade: A\+/ })).toBeVisible();
 
   // session recorded
   await page.getByRole('button', { name: 'Home' }).click();
@@ -55,7 +55,7 @@ test('full wire-maze mission: setup, solve, debrief, logbook', async ({ page }) 
   await expect(page.getByText(code)).toBeVisible();
 });
 
-test('wrong cuts raise alarms and trip the soft-failure debrief', async ({ page }) => {
+test('a wrong cut fails the module and the mission grades F', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'New Mission' }).click();
   await page.getByRole('button', { name: /Add Laser Grid Bypass, Rookie/ }).click();
@@ -67,16 +67,16 @@ test('wrong cuts raise alarms and trip the soft-failure debrief', async ({ page 
   const solution = solveWireMaze(instance.state);
   const wrongIndex = instance.state.wires.findIndex((_, i) => !solution.includes(i));
 
-  // default tolerance is 3 alarms
-  for (let i = 0; i < 3; i++) {
-    const wire = instance.state.wires[wrongIndex];
-    await page
-      .getByRole('button', { name: new RegExp(`^Wire ${wrongIndex + 1}: ${wire.color}, ${wire.pattern}, tag ${wire.label}`) })
-      .click();
-  }
+  // default limit: ONE wrong answer fails the module
+  const wire = instance.state.wires[wrongIndex];
+  await page
+    .getByRole('button', { name: new RegExp(`^Wire ${wrongIndex + 1}: ${wire.color}, ${wire.pattern}, tag ${wire.label}`) })
+    .click();
 
-  await expect(page.getByRole('heading', { name: /alarm tripped/i })).toBeVisible();
-  // soft failure: same mission is replayable
+  // the (only) module failed -> mission completes with an F
+  await expect(page.getByRole('heading', { name: /Mission grade: F/ })).toBeVisible();
+  await expect(page.getByText(/failed/)).toBeVisible();
+  // stakes are the grade — the mission itself stays replayable
   await expect(page.getByRole('button', { name: 'Replay same mission' })).toBeVisible();
 });
 

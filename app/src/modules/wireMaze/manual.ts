@@ -50,7 +50,7 @@ export const wireMazeManual: ManualSection = {
       {
         kind: 'callout',
         tone: 'warning',
-        text: 'A wrong cut raises the alarm level. If you are not sure, ask the Agent to describe the wire again before saying "cut".',
+        text: 'A wrong cut can fail this module and hurt the mission grade. If you are not sure, ask the Agent to describe the wire again before saying "cut".',
       },
     ],
   },

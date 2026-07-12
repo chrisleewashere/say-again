@@ -17,8 +17,10 @@ Get a pair of students from zero to their first escape in about five minutes.
    rule: *no peeking at each other's side.*
 2. **Build the mission.** New Mission → filter by the goal you're targeting → add 2–3
    puzzles (the setup screen shows estimated minutes). Rookie tier for first-timers.
-3. **Pick the pace.** Relaxed (default, no timer) for most sessions. Gentle timer adds light
-   urgency once the pair is comfortable. Alarm tolerance: 3 is a good start.
+3. **Pick the pace and the stakes.** Relaxed (default, no timer) for most sessions; gentle
+   timer adds light urgency once the pair is comfortable. Wrong-answer limit: 1 wrong fails the
+   module by default — raise it to 2 or 3 for students who need more room. Every mission ends
+   with a letter grade (A+ to F) built from how cleanly each module was worked.
 4. **Add initials** (optional) so the session shows up in the Logbook under the right pair.
    Initials or nicknames only — never full names.
 5. **Start, sit back, tally.** Tap the small chart dot (bottom-right) to open the tally
@@ -40,8 +42,9 @@ Get a pair of students from zero to their first escape in about five minutes.
 
 ## Therapy moves that work well
 
-- **Breakdown = teaching moment.** When the alarm trips, resist fixing it. Ask: "What
-  question could you have asked before cutting?"
+- **Breakdown = teaching moment.** When a module fails and seals red, resist fixing it. Ask:
+  "What question could you have asked before committing?" The grade at the end makes that
+  conversation concrete.
 - **Script starters** for students who stall: "I see…", "Which one do you mean?", "Can you
   say that a different way?", "Let me repeat that back."
 - **Mission codes are your friend.** A pair melted down mid-mission? The same code rebuilds

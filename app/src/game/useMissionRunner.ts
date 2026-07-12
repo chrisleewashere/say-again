@@ -12,7 +12,12 @@ import type { TallyEvent } from '../slp/db';
 export interface MissionRunner {
   instances: PuzzleInstance[];
   moduleIndex: number;
-  strikes: number;
+  /** wrong answers on the CURRENT module (resets when the mission advances) */
+  moduleStrikes: number;
+  /** results recorded so far (passed and failed modules) */
+  results: ModuleResult[];
+  /** true for ~700ms after the current module fails (shell feedback) */
+  moduleFailedFlash: boolean;
   secondsLeft: number;
   timed: boolean;
   finished: boolean;
@@ -34,7 +39,8 @@ export function useMissionRunner(
   const instances = useMemo(() => instantiateMission(config), [config]);
   const startedAt = useMemo(() => Date.now(), []);
   const [moduleIndex, setModuleIndex] = useState(0);
-  const [strikes, setStrikes] = useState(0);
+  const [moduleStrikes, setModuleStrikes] = useState(0);
+  const [moduleFailedFlash, setModuleFailedFlash] = useState(false);
   const [results, setResults] = useState<ModuleResult[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(config.timer.seconds);
   const [alarmFlash, setAlarmFlash] = useState(false);
@@ -120,38 +126,53 @@ export function useMissionRunner(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft, timed]);
 
+  /** Record the current module (passed or failed) and move on / finish. */
+  function advance(moduleResult: ModuleResult) {
+    const nextResults = [...results, moduleResult];
+    setResults(nextResults);
+    if (moduleIndex + 1 >= instances.length) {
+      finish('complete', nextResults);
+    } else {
+      moduleStartRef.current = Date.now();
+      moduleStrikesRef.current = 0;
+      setModuleStrikes(0);
+      setModuleIndex(moduleIndex + 1);
+    }
+  }
+
   function handleSolved() {
     const instance = instances[moduleIndex];
-    const moduleResult: ModuleResult = {
+    advance({
       moduleId: instance.moduleId,
       difficulty: instance.difficulty,
       solved: true,
       strikes: moduleStrikesRef.current,
       hintsUsed: 0,
       elapsedMs: Date.now() - moduleStartRef.current,
-    };
-    const nextResults = [...results, moduleResult];
-    setResults(nextResults);
-    if (moduleIndex + 1 >= instances.length) {
-      finish('escaped', nextResults);
-    } else {
-      moduleStartRef.current = Date.now();
-      moduleStrikesRef.current = 0;
-      setModuleIndex(moduleIndex + 1);
-    }
+    });
   }
 
   function handleStrike() {
     moduleStrikesRef.current += 1;
+    setModuleStrikes(moduleStrikesRef.current);
     setAlarmFlash(true);
     setTimeout(() => setAlarmFlash(false), 700);
-    setStrikes((s) => {
-      const next = s + 1;
-      if (next >= config.maxStrikes) {
-        finish('alarm', padResults(results));
-      }
-      return next;
-    });
+    // Too many wrong answers: THIS module fails and seals; the mission
+    // continues — the end-of-mission grade carries the stakes.
+    if (moduleStrikesRef.current >= config.maxStrikes) {
+      const instance = instances[moduleIndex];
+      setModuleFailedFlash(true);
+      setTimeout(() => setModuleFailedFlash(false), 700);
+      advance({
+        moduleId: instance.moduleId,
+        difficulty: instance.difficulty,
+        solved: false,
+        failed: true,
+        strikes: moduleStrikesRef.current,
+        hintsUsed: 0,
+        elapsedMs: Date.now() - moduleStartRef.current,
+      });
+    }
   }
 
   function handleTally(event: TallyEvent) {
@@ -161,7 +182,9 @@ export function useMissionRunner(
   return {
     instances,
     moduleIndex,
-    strikes,
+    moduleStrikes,
+    results,
+    moduleFailedFlash,
     secondsLeft,
     timed,
     finished,

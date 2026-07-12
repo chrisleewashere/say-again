@@ -1,3 +1,4 @@
+import { gradeCopy, gradeMission, moduleScore } from '../engine/grade';
 import { getModule } from '../engine/registry';
 import { DIFFICULTY_LABELS, type MissionResult } from '../engine/types';
 import './game.css';
@@ -9,33 +10,27 @@ interface DebriefProps {
   onHome: () => void;
 }
 
-const OUTCOME_COPY: Record<MissionResult['outcome'], { title: string; body: string }> = {
-  escaped: {
-    title: 'Mission accomplished!',
-    body: 'Great teamwork — clear descriptions, good questions, everyone escaped.',
-  },
-  alarm: {
-    title: 'The alarm tripped — regroup!',
-    body: 'The security system spotted you this time. Talk about what to ask each other next round, then try again.',
-  },
-  timeout: {
-    title: 'Time ran out — so close!',
-    body: 'The janitor locked the wing. Same mission code, same puzzles — plan your questions and go again.',
-  },
-  abandoned: {
-    title: 'Mission paused',
-    body: 'No problem — the mission code will bring these exact puzzles back any time.',
-  },
-};
-
 export function Debrief({ result, onReplaySame, onNewMission, onHome }: DebriefProps) {
-  const copy = OUTCOME_COPY[result.outcome];
+  const grade = gradeMission(result.outcome, result.modules);
+  const copy = gradeCopy(grade);
   const minutes = Math.max(1, Math.round((result.endedAt - result.startedAt) / 60000));
+  const timedOut = result.outcome === 'timeout';
 
   return (
     <main className="screen debrief-screen">
-      <h1 className={result.outcome === 'escaped' ? 'debrief-win' : 'debrief-soft'}>{copy.title}</h1>
-      <p className="home-sub">{copy.body}</p>
+      <div
+        className={`debrief-grade debrief-grade-${grade.letter === 'I' ? 'i' : grade.score >= 80 ? 'good' : grade.score >= 60 ? 'mid' : 'low'}`}
+        role="img"
+        aria-label={grade.letter === 'I' ? 'Grade: incomplete' : `Mission grade ${grade.letter}, score ${grade.score} out of 100`}
+      >
+        <span className="debrief-grade-letter" aria-hidden="true">{grade.letter}</span>
+        {grade.letter !== 'I' && (
+          <span className="debrief-grade-score" aria-hidden="true">{grade.score}/100</span>
+        )}
+      </div>
+
+      <h1 className={grade.score >= 80 ? 'debrief-win' : 'debrief-soft'}>{copy.title}</h1>
+      <p className="home-sub">{timedOut ? `Time ran out. ${copy.body}` : copy.body}</p>
 
       <section className="card debrief-card" aria-label="Mission summary">
         <p className="debrief-meta">
@@ -44,12 +39,19 @@ export function Debrief({ result, onReplaySame, onNewMission, onHome }: DebriefP
         <ul className="debrief-modules">
           {result.modules.map((m, i) => {
             const def = getModule(m.moduleId);
+            const state = m.solved ? 'passed' : m.failed ? 'failed' : 'not reached';
             return (
               <li key={i}>
-                <span className={`debrief-dot ${m.solved ? 'debrief-dot-win' : 'debrief-dot-miss'}`} aria-hidden="true" />
+                <span
+                  className={`debrief-dot ${m.solved ? 'debrief-dot-win' : 'debrief-dot-miss'}`}
+                  aria-hidden="true"
+                />
                 <span className="debrief-mod-name">{def.codename}</span>
                 <span className="debrief-mod-detail">
-                  {DIFFICULTY_LABELS[m.difficulty]} · {m.solved ? 'solved' : 'not solved'} · {m.strikes} alarm{m.strikes === 1 ? '' : 's'}
+                  {DIFFICULTY_LABELS[m.difficulty]} · {state}
+                  {m.solved || m.failed
+                    ? ` · ${m.strikes} wrong · ${moduleScore(m)} pts`
+                    : ''}
                 </span>
               </li>
             );

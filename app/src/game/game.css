@@ -314,3 +314,84 @@
   color: var(--text-mid);
   font-size: 0.92em;
 }
+
+/* ---------- module corner lamp ---------- */
+.run-module-frame {
+  position: relative;
+}
+
+.run-module-lamp {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  z-index: 5;
+}
+
+.module-lamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 8px;
+}
+
+.module-lamp-wrong .module-lamp-jewel {
+  animation: lamp-blink 0.35s ease-out 2;
+}
+
+@keyframes lamp-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.module-lamp-text {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.14em;
+  color: var(--text-mid);
+}
+
+.module-lamp-pips {
+  display: inline-flex;
+  gap: 3px;
+}
+
+/* ---------- debrief grade stamp ---------- */
+.debrief-grade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 5px solid var(--line);
+  background: var(--bg-1);
+  transform: rotate(-4deg);
+  gap: 2px;
+}
+
+.debrief-grade-letter {
+  font-family: var(--font-mono);
+  font-size: 3.2em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.debrief-grade-score {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-mid);
+}
+
+.debrief-grade-good { border-color: var(--success); }
+.debrief-grade-good .debrief-grade-letter { color: var(--success); }
+.debrief-grade-mid { border-color: var(--amber); }
+.debrief-grade-mid .debrief-grade-letter { color: var(--amber); }
+.debrief-grade-low { border-color: var(--danger); }
+.debrief-grade-low .debrief-grade-letter { color: var(--danger); }
+.debrief-grade-i { border-color: var(--line); }
+.debrief-grade-i .debrief-grade-letter { color: var(--text-mid); }

@@ -90,7 +90,7 @@ function renderEdition(editionKey: 'standard' | 'simplified'): string {
            <li>Ask for details: colors, shapes, letters, numbers, positions.</li>
            <li>Work the rules out loud and give one clear direction at a time.</li>
            <li>Have the Agent repeat the direction back before they touch anything.</li>
-           <li>Wrong guesses raise the alarm level — asking another question never does.</li>
+           <li>Wrong guesses can fail the module and drag the mission grade down — asking another question never costs a thing.</li>
          </ol>`
       : `<p>You are the <strong>Handler</strong>. Your partner is the <strong>Agent</strong>.
          The Agent sees the puzzle. You see the rules. Talk to win!</p>
@@ -99,7 +99,7 @@ function renderEdition(editionKey: 'standard' | 'simplified'): string {
            <li>Find that puzzle in this book.</li>
            <li>Ask about colors, shapes, and letters.</li>
            <li>Say one step at a time.</li>
-           <li>Not sure? Ask again. Asking is always safe.</li>
+           <li>Not sure? Ask again. Asking is always free. A wrong pick is not.</li>
          </ol>`;
 
   const difficultyNote = `The app calls easy puzzles ${esc(DIFFICULTY_LABELS[1])}, medium ${esc(

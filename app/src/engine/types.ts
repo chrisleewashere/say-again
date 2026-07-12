@@ -147,17 +147,28 @@ export interface MissionConfig {
   code: string;
   modules: MissionModuleSpec[];
   timer: TimerConfig;
-  /** Max wrong answers before the (soft) "alarm tripped" retry state. */
+  /**
+   * Wrong answers allowed PER MODULE before that module fails and seals
+   * (1-3, SLP-set). The mission always runs to completion; stakes live in
+   * the end-of-mission grade. Field name kept for stored-session compat.
+   */
   maxStrikes: number;
   hintsAllowed: boolean;
 }
 
-export type MissionOutcome = 'escaped' | 'alarm' | 'timeout' | 'abandoned';
+/**
+ * 'complete' = played to the end (the grade tells the story). 'escaped' and
+ * 'alarm' are legacy values that may exist in stored sessions.
+ */
+export type MissionOutcome = 'complete' | 'escaped' | 'alarm' | 'timeout' | 'abandoned';
 
 export interface ModuleResult {
   moduleId: string;
   difficulty: Difficulty;
   solved: boolean;
+  /** true when the module sealed after too many wrong answers */
+  failed?: boolean;
+  /** wrong answers committed on this module */
   strikes: number;
   hintsUsed: number;
   /** ms spent on this module */

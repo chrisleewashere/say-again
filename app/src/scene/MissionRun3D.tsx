@@ -1,7 +1,9 @@
 /**
  * The Field Case shell: same mission logic as the classic 2D shell (shared
- * useMissionRunner hook), presented as an opened analog spycraft briefcase
- * with the mission's modules racked on it.
+ * useMissionRunner hook), presented as an opened analog spycraft briefcase.
+ * Gameplay interaction happens in a FLAT screen-space panel (iOS Safari
+ * drops touches on CSS-3D-transformed DOM); the 3D plates are the object's
+ * decorative faces and status lamps.
  */
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -9,8 +11,11 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { playSfx } from '../audio/useSfx';
 import { useQuality } from '../quality/useQuality';
+import { gradeMission } from '../engine/grade';
+import { getModule } from '../engine/registry';
 import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types';
 import { MissionHeader } from '../game/MissionRun';
+import { ModuleLamp, type LampState } from '../game/ModuleLamp';
 import { useMissionRunner } from '../game/useMissionRunner';
 import { useMissionSfx } from '../game/useMissionSfx';
 import { TallyOverlay } from '../slp/TallyOverlay';
@@ -82,7 +87,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   const finishWithSfx = useMemo(
     () =>
       (result: MissionResult, tallies: TallyEvent[]) => {
-        playSfx(result.outcome === 'escaped' ? 'missionWin' : result.outcome === 'alarm' ? 'lockdown' : 'lidCreak');
+        const grade = gradeMission(result.outcome, result.modules);
+        playSfx(grade.letter !== 'I' && grade.score >= 80 ? 'missionWin' : 'lidCreak');
         onFinish(result, tallies);
       },
     [onFinish],
@@ -90,7 +96,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   const runner = useMissionRunner(config, finishWithSfx);
   useMissionSfx(runner);
   const quality = useQuality();
-  const [zoomed, setZoomed] = useState<{ index: number; pose: CameraPose } | null>(null);
+  const [zoomed, setZoomed] = useState<CameraPose | null>(null);
   const poseGetters = useRef(new Map<number, () => CameraPose | null>());
   const slots = useMemo(() => baySlots(runner.instances.length), [runner.instances.length]);
   const reducedMotion =
@@ -98,8 +104,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const openAmount = useOpenAmount(reducedMotion);
 
-  // Step back to overview when a solve advances the mission, so the solved
-  // lamp ping and the next lit module both read.
+  // Step back to overview when the mission advances, so the plate lamp
+  // (green or red) and the next lit module both read before re-opening.
   const prevModuleIndex = useRef(runner.moduleIndex);
   useEffect(() => {
     if (runner.moduleIndex !== prevModuleIndex.current) {
@@ -108,8 +114,20 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     }
   }, [runner.moduleIndex]);
 
-  const bayState = (i: number): BayState =>
-    i < runner.moduleIndex ? 'solved' : i === runner.moduleIndex ? 'active' : 'locked';
+  const bayState = (i: number): BayState => {
+    if (i === runner.moduleIndex && !runner.finished) return 'active';
+    const recorded = runner.results[i];
+    if (recorded) return recorded.solved ? 'solved' : 'failed';
+    return i < runner.moduleIndex ? 'solved' : 'locked';
+  };
+
+  function openActivePanel(pose?: CameraPose | null) {
+    const resolved = pose ?? poseGetters.current.get(runner.moduleIndex)?.() ?? null;
+    if (resolved) {
+      playSfx('buttonPress');
+      setZoomed(resolved);
+    }
+  }
 
   const renderPlate = (i: number) => (
     <Faceplate
@@ -117,18 +135,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       slot={slots[i]}
       instance={runner.instances[i]}
       state={bayState(i)}
-      zoomed={zoomed?.index === i}
-      onSelect={(pose) => {
-        playSfx('buttonPress');
-        setZoomed({ index: i, pose });
-      }}
+      onSelect={(pose) => openActivePanel(pose)}
       registerPoseGetter={(get) => poseGetters.current.set(i, get)}
-      moduleProps={{
-        onSolved: runner.handleSolved,
-        onStrike: runner.handleStrike,
-        a11y,
-        disabled: runner.finished,
-      }}
     />
   );
 
@@ -139,6 +147,15 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   const lidPlates = platesReady
     ? runner.instances.map((_, i) => (slots[i].parent === 'lid' ? renderPlate(i) : null))
     : null;
+
+  const activeInstance = runner.instances[runner.moduleIndex];
+  const activeDef = getModule(activeInstance.moduleId);
+  const lampState: LampState = runner.moduleFailedFlash
+    ? 'failed'
+    : runner.alarmFlash
+      ? 'wrong'
+      : 'active';
+  const panelOpen = zoomed !== null && !runner.finished;
 
   return (
     <main className="scene-screen">
@@ -168,7 +185,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
 
         <FieldCase
           openAmount={openAmount}
-          strikes={runner.strikes}
+          strikes={runner.moduleStrikes}
           maxStrikes={config.maxStrikes}
           alarmFlash={runner.alarmFlash}
           baseChildren={basePlates}
@@ -181,15 +198,37 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
           <meshStandardMaterial color="#101418" roughness={0.9} />
         </mesh>
 
-        <CameraRig zoomPose={zoomed?.pose ?? null} reducedMotion={reducedMotion} />
+        <CameraRig zoomPose={zoomed} reducedMotion={reducedMotion} />
       </Canvas>
 
       {runner.alarmFlash && <div className="scene-flash-overlay" aria-hidden="true" />}
 
+      {/* The live module plays in this FLAT panel (plain DOM, no 3D
+          transforms — reliable touch on iPad). Kept mounted while hidden so
+          in-module progress survives stepping back to look at the case. */}
+      <div className={`scene-panel${panelOpen ? '' : ' scene-panel-hidden'}`} aria-hidden={!panelOpen}>
+        <div className="scene-panel-frame">
+          <div className="scene-panel-head">
+            <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
+            <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
+          </div>
+          <div className="scene-panel-body">
+            <activeDef.Component
+              key={runner.moduleIndex}
+              instance={activeInstance}
+              onSolved={runner.handleSolved}
+              onStrike={runner.handleStrike}
+              a11y={a11y}
+              disabled={runner.finished || !panelOpen}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="scene-chrome scene-chrome-bottom">
-        {zoomed ? (
+        {panelOpen ? (
           <button className="scene-back-btn" onClick={() => setZoomed(null)}>
-            &larr; Step back from the panel
+            &larr; Step back to the case
           </button>
         ) : (
           <div className="scene-hint-row">
@@ -197,16 +236,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
               Drag (or use arrow keys) to turn the case · tap the lit module to work on it
             </p>
             {platesReady && !runner.finished && (
-              <button
-                className="scene-open-btn"
-                onClick={() => {
-                  const pose = poseGetters.current.get(runner.moduleIndex)?.();
-                  if (pose) {
-                    playSfx('buttonPress');
-                    setZoomed({ index: runner.moduleIndex, pose });
-                  }
-                }}
-              >
+              <button className="scene-open-btn" onClick={() => openActivePanel()}>
                 Open the lit panel
               </button>
             )}

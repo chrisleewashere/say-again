@@ -27,7 +27,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const [filter, setFilter] = useState<TherapyTarget | 'all'>('all');
   const [picked, setPicked] = useState<MissionModuleSpec[]>([]);
   const [timerMode, setTimerMode] = useState<TimerMode>('relaxed');
-  const [maxStrikes, setMaxStrikes] = useState(3);
+  const [maxStrikes, setMaxStrikes] = useState(1);
   const [studentA, setStudentA] = useState('');
   const [studentB, setStudentB] = useState('');
   const [replayNotice, setReplayNotice] = useState<string | null>(null);

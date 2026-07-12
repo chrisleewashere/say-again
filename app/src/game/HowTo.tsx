@@ -33,10 +33,12 @@ export function HowTo({ onBack }: HowToProps) {
       </section>
 
       <section className="card setup-section">
-        <h2>Alarms and time</h2>
+        <h2>Wrong answers, grades, and time</h2>
         <p className="home-sub" style={{ maxWidth: 'none' }}>
-          A wrong move raises the alarm level. Too many alarms and the mission resets — nobody
-          gets hurt, and the same mission code brings the exact same puzzles back for another try.
+          Every wrong choice flashes the module's corner lamp red — and each module only forgives
+          so many (your teacher sets it: one to three). Push past the limit and that module fails
+          and seals shut; the mission moves on without it. At the end you get a real letter grade,
+          A+ to F, built from how cleanly you worked each module. Talk first, confirm, then commit.
           Timers are optional; your teacher picks relaxed, gentle, or challenge pace.
         </p>
       </section>

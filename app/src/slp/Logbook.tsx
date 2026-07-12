@@ -93,6 +93,7 @@ export function Logbook({ onBack }: LogbookProps) {
                   <th>Date</th>
                   <th>Mission</th>
                   <th>Team</th>
+                  <th>Grade</th>
                   <th>Outcome</th>
                   <th>Solved</th>
                   <th>Agent tally</th>
@@ -106,6 +107,7 @@ export function Logbook({ onBack }: LogbookProps) {
                     <td>{new Date(s.startedAt).toLocaleDateString()}</td>
                     <td><span className="mission-code">{s.code}</span></td>
                     <td>{[s.studentA, s.studentB].filter(Boolean).join(' & ') || '—'}</td>
+                    <td>{s.grade ?? '—'}</td>
                     <td>{s.outcome}</td>
                     <td>
                       {s.modules.filter((m) => m.solved).length}/{s.modules.length}

@@ -30,15 +30,17 @@ test('field case: open, zoom, solve through the plate, debrief', async ({ page }
   await expect(page.getByRole('button', { name: /Step back/ })).toBeVisible({ timeout: 15_000 });
   await page.waitForTimeout(2000); // camera dolly
 
+  // gameplay happens in the FLAT panel (plain DOM — the iPad-safe surface)
+  await expect(page.locator('.scene-panel-frame')).toBeVisible();
   for (const wireIndex of solution) {
     const wire = instance.state.wires[wireIndex];
     await page
-      .locator('.faceplate-live')
+      .locator('.scene-panel')
       .getByRole('button', { name: new RegExp(`^Wire ${wireIndex + 1}: ${wire.color}, ${wire.pattern}, tag ${wire.label}`) })
-      .click({ force: true });
+      .click();
   }
 
-  await expect(page.getByRole('heading', { name: 'Mission accomplished!' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: /Mission grade: A\+/ })).toBeVisible({ timeout: 15_000 });
 });
 
 test('classic mode setting keeps missions in 2D', async ({ page }) => {

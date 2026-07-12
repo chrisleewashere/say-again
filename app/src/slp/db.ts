@@ -24,8 +24,11 @@ export interface SessionRecord {
   endedAt: number;
   outcome: MissionOutcome;
   timerMode: TimerMode;
-  /** Alarm tolerance the mission ran with (absent on early records; default 3). */
+  /** Wrong answers allowed per module (absent on early records; default 3). */
   maxStrikes?: number;
+  /** Mission letter grade + score (absent on records from before grading). */
+  grade?: string;
+  gradeScore?: number;
   studentA: string;
   studentB: string;
   modules: ModuleResult[];
@@ -85,7 +88,7 @@ export function sessionsToCsv(sessions: SessionRecord[]): string {
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const header = [
-    'date_iso', 'date_local', 'time_local', 'mission_code', 'outcome', 'timer_mode', 'student_agent', 'student_handler',
+    'date_iso', 'date_local', 'time_local', 'mission_code', 'outcome', 'grade', 'grade_score', 'timer_mode', 'student_agent', 'student_handler',
     'modules_played', 'modules_solved', 'total_strikes', 'total_hints', 'duration_min',
     'tally_A_correct', 'tally_A_prompted', 'tally_A_incorrect',
     'tally_B_correct', 'tally_B_prompted', 'tally_B_incorrect',
@@ -95,7 +98,7 @@ export function sessionsToCsv(sessions: SessionRecord[]): string {
     const count = (st: 'A' | 'B', r: TallyResult) =>
       s.tallies.filter((t) => t.student === st && t.result === r).length;
     return [
-      d.toISOString(), d.toLocaleDateString(), d.toLocaleTimeString(), s.code, s.outcome, s.timerMode,
+      d.toISOString(), d.toLocaleDateString(), d.toLocaleTimeString(), s.code, s.outcome, s.grade ?? '', s.gradeScore ?? '', s.timerMode,
       s.studentA, s.studentB,
       s.modules.length,
       s.modules.filter((m) => m.solved).length,

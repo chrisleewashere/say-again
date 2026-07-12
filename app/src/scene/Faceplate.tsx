@@ -1,33 +1,32 @@
 /**
- * A standard module faceplate: phenolic panel, four corner screws, engraved
- * codename tag, solved/active jewel lamp — with the module's real (tested,
- * accessible) DOM UI rendered live on the plate via drei's Html transform.
- * Interaction is enabled only while the camera is zoomed to this bay, so
- * distant plates can't be mis-tapped.
+ * A module faceplate on the case: phenolic panel, corner screws, engraved
+ * codename tag, jewel lamp, and a DECORATIVE printed face. The live module
+ * UI intentionally does NOT render here — iOS Safari drops touches on
+ * CSS-3D-transformed content, so gameplay happens in the shell's flat
+ * screen-space panel. Tapping the lit plate zooms the camera and opens it.
  */
 import { Html, RoundedBox } from '@react-three/drei';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import * as THREE from 'three';
-import type { ModuleComponentProps, PuzzleInstance } from '../engine/types';
+import type { PuzzleInstance } from '../engine/types';
 import { getModule } from '../engine/registry';
+import { DIFFICULTY_LABELS } from '../engine/types';
 import type { BaySlot } from './layout';
 import { PLATE_SIZE, zoomPoseFromWorld } from './layout';
 import type { CameraPose } from './CameraRig';
-import { FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, SCREW_STEEL } from './materials';
+import { FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, LAMP_RED, SCREW_STEEL } from './materials';
 import './scene.css';
 
-export type BayState = 'locked' | 'active' | 'solved';
+export type BayState = 'locked' | 'active' | 'solved' | 'failed';
 
 interface FaceplateProps {
   slot: BaySlot;
   instance: PuzzleInstance;
   state: BayState;
-  zoomed: boolean;
   /** called with the camera pose for this plate, resolved from world space */
   onSelect: (pose: CameraPose) => void;
   /** lets the shell zoom here programmatically (keyboard/switch access) */
   registerPoseGetter?: (getPose: () => CameraPose | null) => void;
-  moduleProps: Omit<ModuleComponentProps<unknown, unknown>, 'instance'>;
 }
 
 const worldPos = new THREE.Vector3();
@@ -35,30 +34,74 @@ const worldQuat = new THREE.Quaternion();
 const worldNormal = new THREE.Vector3();
 const worldUp = new THREE.Vector3();
 
-export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPoseGetter, moduleProps }: FaceplateProps) {
+const STATUS_WORD: Record<BayState, string> = {
+  locked: 'SEALED',
+  active: 'IN OPERATION',
+  solved: 'PASSED',
+  failed: 'FAILED',
+};
+
+const LAMP: Record<BayState, THREE.Material> = {
+  locked: LAMP_OFF,
+  active: LAMP_AMBER,
+  solved: LAMP_GREEN,
+  failed: LAMP_RED,
+};
+
+/** Simple original hardware glyph per state — dials for live, bars for sealed. */
+function FaceGlyph({ state }: { state: BayState }) {
+  if (state === 'failed') {
+    return (
+      <svg viewBox="0 0 96 96" width="120" height="120" aria-hidden="true">
+        <circle cx="48" cy="48" r="34" fill="none" stroke="#7a3b42" strokeWidth="6" />
+        <line x1="28" y1="28" x2="68" y2="68" stroke="#7a3b42" strokeWidth="7" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (state === 'solved') {
+    return (
+      <svg viewBox="0 0 96 96" width="120" height="120" aria-hidden="true">
+        <circle cx="48" cy="48" r="34" fill="none" stroke="#3f7a5c" strokeWidth="6" />
+        <path d="M32 50 l12 12 l22 -26" fill="none" stroke="#3f7a5c" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (state === 'locked') {
+    return (
+      <svg viewBox="0 0 96 96" width="120" height="120" aria-hidden="true">
+        <rect x="26" y="42" width="44" height="34" rx="6" fill="none" stroke="#4a4238" strokeWidth="6" />
+        <path d="M34 42 v-7 a14 14 0 0 1 28 0 v7" fill="none" stroke="#4a4238" strokeWidth="6" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 96 96" width="120" height="120" aria-hidden="true">
+      <circle cx="48" cy="48" r="30" fill="none" stroke="#8a7a5c" strokeWidth="5" />
+      <circle cx="48" cy="48" r="5" fill="#8a7a5c" />
+      <line x1="48" y1="48" x2="64" y2="32" stroke="#8a7a5c" strokeWidth="5" strokeLinecap="round" />
+      {Array.from({ length: 8 }, (_, i) => {
+        const a = (i / 8) * Math.PI * 2;
+        return (
+          <line
+            key={i}
+            x1={48 + Math.cos(a) * 34}
+            y1={48 + Math.sin(a) * 34}
+            x2={48 + Math.cos(a) * 39}
+            y2={48 + Math.sin(a) * 39}
+            stroke="#8a7a5c"
+            strokeWidth="4"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter }: FaceplateProps) {
   const def = getModule(instance.moduleId);
   const groupRef = useRef<THREE.Group>(null);
-  const fitRef = useRef<HTMLDivElement>(null);
-  const [fitScale, setFitScale] = useState(1);
-
-  // Tall modules (keypads, maps) scale down to fit the plate instead of
-  // clipping; transform doesn't affect layout size, so measurement is stable.
-  useLayoutEffect(() => {
-    const el = fitRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const AVAILABLE = 545;
-    const measure = () => {
-      const natural = el.scrollHeight;
-      setFitScale(Math.min(1, AVAILABLE / Math.max(1, natural)));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [state]);
   const s = PLATE_SIZE;
   const screwOff = s / 2 + 0.02;
-  const interactive = zoomed && state === 'active';
 
   function computePose(): CameraPose | null {
     const g = groupRef.current;
@@ -84,7 +127,7 @@ export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPos
 
   return (
     <group ref={groupRef} position={slot.position} rotation={slot.rotation}>
-      {/* phenolic panel behind the DOM face */}
+      {/* phenolic panel */}
       <RoundedBox args={[s + 0.18, s + 0.18, 0.06]} radius={0.02} position={[0, 0, -0.032]} material={FACEPLATE_PHENOLIC} />
       {/* corner screws on the bezel margin */}
       {[
@@ -97,16 +140,13 @@ export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPos
           <cylinderGeometry args={[0.026, 0.026, 0.015, 10]} />
         </mesh>
       ))}
-      {/* jewel lamp: amber = active, green = solved, dark = locked */}
-      <mesh
-        position={[screwOff, 0, 0.01]}
-        material={state === 'solved' ? LAMP_GREEN : state === 'active' ? LAMP_AMBER : LAMP_OFF}
-      >
+      {/* jewel lamp: amber = live, green = passed, red = failed, dark = sealed */}
+      <mesh position={[screwOff, 0, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
 
-      {/* invisible tap target covering the plate (select/zoom in overview) */}
-      {!zoomed && state !== 'locked' && (
+      {/* tap target: only the lit module opens */}
+      {state === 'active' && (
         <mesh position={[0, 0, 0.02]} onClick={(e) => { e.stopPropagation(); select(); }}>
           <planeGeometry args={[s + 0.18, s + 0.18]} />
           {/* invisible but raycastable (visible=false is skipped by the raycaster) */}
@@ -114,30 +154,21 @@ export function Faceplate({ slot, instance, state, zoomed, onSelect, registerPos
         </mesh>
       )}
 
-      {/* the live module UI on the plate face */}
+      {/* decorative printed face (never interactive; gameplay is in the shell panel) */}
       <Html
         transform
         position={[0, 0, 0.004]}
         scale={0.0715}
         wrapperClass="faceplate-wrap"
-        className={`faceplate-html${interactive ? ' faceplate-live' : ''}`}
+        className="faceplate-html"
         zIndexRange={[10, 0]}
       >
-        <div className="faceplate-content" aria-hidden={!interactive} data-bay-state={state}>
-          <div className="faceplate-tag" aria-hidden="true">{def.codename.toUpperCase()}</div>
-          {state === 'locked' ? (
-            <div className="faceplate-locked">
-              <svg viewBox="0 0 48 48" width="64" height="64" aria-hidden="true">
-                <rect x="10" y="20" width="28" height="20" rx="4" fill="none" stroke="#5b6675" strokeWidth="3.5" />
-                <path d="M16 20 v-4 a8 8 0 0 1 16 0 v4" fill="none" stroke="#5b6675" strokeWidth="3.5" />
-              </svg>
-              <p>Sealed — finish the lit module first.</p>
-            </div>
-          ) : (
-            <div ref={fitRef} className="faceplate-fit" style={{ transform: `scale(${fitScale})` }}>
-              <def.Component instance={instance} {...moduleProps} disabled={moduleProps.disabled || !interactive} />
-            </div>
-          )}
+        <div className="faceplate-content" aria-hidden="true" data-bay-state={state}>
+          <div className="faceplate-tag">{def.codename.toUpperCase()}</div>
+          <FaceGlyph state={state} />
+          <div className="faceplate-status">{STATUS_WORD[state]}</div>
+          <div className="faceplate-diff">{DIFFICULTY_LABELS[instance.difficulty].toUpperCase()}</div>
+          {state === 'active' && <div className="faceplate-cta">TAP TO OPERATE</div>}
         </div>
       </Html>
     </group>

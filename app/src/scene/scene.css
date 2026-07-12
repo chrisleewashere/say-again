@@ -77,16 +77,12 @@
   100% { box-shadow: inset 0 0 0 0 rgba(255, 90, 90, 0); background: rgba(255, 90, 90, 0); }
 }
 
-/* ---------- faceplate DOM (rendered in 3D via Html transform) ---------- */
-/* drei's outer transform wrapper must never intercept canvas drags */
+/* ---------- faceplate DOM (decorative only, rendered via Html transform) --- */
+/* Never interactive: iOS Safari drops touches on 3D-transformed DOM, so all
+   gameplay happens in .scene-panel below. */
 .faceplate-wrap,
 .faceplate-wrap * {
   pointer-events: none;
-}
-
-.faceplate-wrap .faceplate-live,
-.faceplate-wrap .faceplate-live * {
-  pointer-events: auto;
 }
 
 .faceplate-content {
@@ -102,16 +98,37 @@
   background: #16130f;
 }
 
-.faceplate-content .card {
-  box-shadow: none;
-  border-color: #3a332b;
-  background: #1b1712;
+.faceplate-status {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  letter-spacing: 0.3em;
+  color: #6d6250;
 }
 
-.faceplate-fit {
-  transform-origin: top center;
-  display: flex;
-  justify-content: center;
+.faceplate-diff {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.25em;
+  color: #4f4739;
+}
+
+.faceplate-cta {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  color: var(--amber);
+  border: 2px solid var(--amber-deep);
+  border-radius: 8px;
+  padding: 8px 18px;
+  margin-top: 10px;
+}
+
+[data-bay-state='failed'] .faceplate-status {
+  color: #a04b55;
+}
+
+[data-bay-state='solved'] .faceplate-status {
+  color: #3f7a5c;
 }
 
 .faceplate-tag {
@@ -142,4 +159,62 @@
 
 [data-bay-state='solved'] .card {
   opacity: 0.55;
+}
+
+/* ---------- flat gameplay panel (plain DOM — reliable iPad touch) ---------- */
+.scene-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 74px 16px 84px;
+  pointer-events: none;
+}
+
+.scene-panel-hidden {
+  display: none;
+}
+
+.scene-panel-frame {
+  pointer-events: auto;
+  background: #16130f;
+  border: 3px solid #3a332b;
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.65);
+  max-width: 700px;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scene-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px 8px;
+}
+
+.scene-panel-tag {
+  font-family: var(--font-mono);
+  letter-spacing: 0.3em;
+  color: #8a7a5c;
+  font-size: 0.9em;
+}
+
+.scene-panel-body {
+  overflow-y: auto;
+  padding: 4px 18px 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.scene-panel-body .card {
+  box-shadow: none;
+  border-color: #3a332b;
+  background: #1b1712;
 }

@@ -7,15 +7,18 @@ import type { MissionRunner } from './useMissionRunner';
  * classic and Field Case shells so audio behavior stays identical.
  */
 export function useMissionSfx(runner: MissionRunner): void {
-  const prevStrikes = useRef(runner.strikes);
+  const prevStrikes = useRef(runner.moduleStrikes);
   const prevSolved = useRef(runner.solvedCount);
+  const prevFailed = useRef(runner.results.filter((r) => r.failed).length);
 
   useEffect(() => {
-    if (runner.strikes > prevStrikes.current) {
+    // moduleStrikes resets to 0 when the mission advances — only an
+    // increase is a wrong answer.
+    if (runner.moduleStrikes > prevStrikes.current) {
       playSfx('strikeBuzz');
     }
-    prevStrikes.current = runner.strikes;
-  }, [runner.strikes]);
+    prevStrikes.current = runner.moduleStrikes;
+  }, [runner.moduleStrikes]);
 
   useEffect(() => {
     if (runner.solvedCount > prevSolved.current) {
@@ -23,4 +26,12 @@ export function useMissionSfx(runner: MissionRunner): void {
     }
     prevSolved.current = runner.solvedCount;
   }, [runner.solvedCount]);
+
+  useEffect(() => {
+    const failed = runner.results.filter((r) => r.failed).length;
+    if (failed > prevFailed.current) {
+      playSfx('lockdown');
+    }
+    prevFailed.current = failed;
+  }, [runner.results]);
 }

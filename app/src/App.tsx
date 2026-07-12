@@ -9,6 +9,7 @@ import { useA11y } from './game/useA11y';
 import { useSceneMode } from './scene/useSceneMode';
 import { Logbook } from './slp/Logbook';
 import { saveSession, type TallyEvent } from './slp/db';
+import { gradeMission } from './engine/grade';
 import type { MissionConfig, MissionResult } from './engine/types';
 
 // Lazy so three.js only loads when a 3D mission actually starts
@@ -36,6 +37,7 @@ function App() {
     result: MissionResult,
     tallies: TallyEvent[],
   ) {
+    const grade = gradeMission(result.outcome, result.modules);
     try {
       // Never let a hung IndexedDB write (seen in WKWebView after
       // backgrounding) strand players on the run screen.
@@ -47,6 +49,8 @@ function App() {
         outcome: result.outcome,
         timerMode: result.timerMode,
         maxStrikes: config.maxStrikes,
+        grade: grade.letter,
+        gradeScore: grade.score,
         studentA: students.a,
         studentB: students.b,
         modules: result.modules,
