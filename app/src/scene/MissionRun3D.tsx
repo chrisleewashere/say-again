@@ -105,10 +105,12 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
         playSfx(good ? 'missionWin' : 'lidCreak');
         haptic(good ? 'win' : 'fail');
         setRitualGrade(grade);
-        const quick = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        // honor BOTH the in-app Reduce-motion toggle and the OS preference
+        const quick =
+          a11y.reducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         finishTimer.current = setTimeout(() => onFinish(result, tallies), quick ? 900 : 2600);
       },
-    [onFinish],
+    [onFinish, a11y.reducedMotion],
   );
   const runner = useMissionRunner(config, finishWithSfx);
   useMissionSfx(runner);

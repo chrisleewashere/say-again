@@ -6,10 +6,22 @@
  * complete module).
  */
 import type { ModuleFace } from './types';
+import { alarmBypassFace } from './alarmBypass';
+import { escapeRouteFace } from './escapeRoute';
+import { idCheckFace } from './idCheck';
+import { keypadCipherFace } from './keypadCipher';
+import { passwordInterceptFace } from './passwordIntercept';
+import { vaultDialFace } from './vaultDial';
 import { wireMazeFace } from './wireMaze';
 
 const FACES: Record<string, ModuleFace<never>> = {
   'wire-maze': wireMazeFace as ModuleFace<never>,
+  'vault-dial': vaultDialFace as ModuleFace<never>,
+  'keypad-cipher': keypadCipherFace as ModuleFace<never>,
+  'password-intercept': passwordInterceptFace as ModuleFace<never>,
+  'alarm-bypass': alarmBypassFace as ModuleFace<never>,
+  'escape-route': escapeRouteFace as ModuleFace<never>,
+  'id-check': idCheckFace as ModuleFace<never>,
 };
 
 export function getFace(moduleId: string): ModuleFace | undefined {
