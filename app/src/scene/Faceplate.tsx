@@ -1,9 +1,10 @@
 /**
  * A module faceplate on the case: phenolic panel, corner screws, engraved
- * codename tag, jewel lamp, and a DECORATIVE printed face. The live module
- * UI intentionally does NOT render here — iOS Safari drops touches on
- * CSS-3D-transformed content, so gameplay happens in the shell's flat
- * screen-space panel. Tapping the lit plate zooms the camera and opens it.
+ * codename tag, jewel lamp, and the module's face. The ACTIVE module's face
+ * is a live canvas texture played by raycast taps (FaceSurface) — fully
+ * in-scene, iPad-reliable. Modules without an in-scene face yet (and sealed/
+ * passed/failed plates) show a decorative printed face instead; taps on the
+ * lit plate zoom the camera either way.
  */
 import { Html, RoundedBox } from '@react-three/drei';
 import { useRef } from 'react';
@@ -14,6 +15,8 @@ import { DIFFICULTY_LABELS } from '../engine/types';
 import type { BaySlot } from './layout';
 import { PLATE_SIZE, zoomPoseFromWorld } from './layout';
 import type { CameraPose } from './CameraRig';
+import { FaceSurface } from './FaceSurface';
+import { getFace } from './faces';
 import { CASE_ALUMINUM_WORN, FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, LAMP_RED, SCREW_STEEL } from './materials';
 import './scene.css';
 
@@ -27,6 +30,15 @@ interface FaceplateProps {
   onSelect: (pose: CameraPose) => void;
   /** lets the shell zoom here programmatically (keyboard/switch access) */
   registerPoseGetter?: (getPose: () => CameraPose | null) => void;
+  /** camera is currently zoomed on this plate */
+  zoomed?: boolean;
+  /** wired to the mission runner when this plate is active and has a face */
+  faceHandlers?: {
+    onSolved: () => void;
+    onStrike: () => void;
+    setStatus: (text: string) => void;
+    disabled: boolean;
+  };
 }
 
 const worldPos = new THREE.Vector3();
@@ -97,11 +109,13 @@ function FaceGlyph({ state }: { state: BayState }) {
   );
 }
 
-export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter }: FaceplateProps) {
+export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter, zoomed, faceHandlers }: FaceplateProps) {
   const def = getModule(instance.moduleId);
   const groupRef = useRef<THREE.Group>(null);
   const s = PLATE_SIZE;
   const screwOff = s / 2 + 0.02;
+  const face = state === 'active' ? getFace(instance.moduleId) : undefined;
+  const liveFace = face && faceHandlers ? face : undefined;
 
   function computePose(): CameraPose | null {
     const g = groupRef.current;
@@ -140,8 +154,8 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter 
           <cylinderGeometry args={[0.026, 0.026, 0.015, 10]} />
         </mesh>
       ))}
-      {/* jewel lamp: amber = live, green = passed, red = failed, dark = sealed */}
-      <mesh position={[screwOff, 0, 0.01]} material={LAMP[state]}>
+      {/* corner jewel lamp: amber = live, green = passed, red = failed, dark = sealed */}
+      <mesh position={[screwOff - 0.09, screwOff - 0.09, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
 
@@ -158,8 +172,21 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter 
           />
         ))}
 
-      {/* tap target: only the lit module opens */}
-      {state === 'active' && (
+      {/* live in-scene face: canvas texture + raycast taps (iPad-reliable) */}
+      {liveFace && faceHandlers && (
+        <FaceSurface
+          face={liveFace}
+          instance={instance}
+          size={s + 0.14}
+          interactive={!!zoomed}
+          disabled={faceHandlers.disabled}
+          onZoomRequest={select}
+          handlers={faceHandlers}
+        />
+      )}
+
+      {/* tap target: only the lit module opens (FaceSurface handles this itself) */}
+      {state === 'active' && !liveFace && (
         <mesh position={[0, 0, 0.02]} onClick={(e) => { e.stopPropagation(); select(); }}>
           <planeGeometry args={[s + 0.18, s + 0.18]} />
           {/* invisible but raycastable (visible=false is skipped by the raycaster) */}
@@ -167,23 +194,25 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter 
         </mesh>
       )}
 
-      {/* decorative printed face (never interactive; gameplay is in the shell panel) */}
-      <Html
-        transform
-        position={[0, 0, 0.004]}
-        scale={0.0715}
-        wrapperClass="faceplate-wrap"
-        className="faceplate-html"
-        zIndexRange={[10, 0]}
-      >
-        <div className="faceplate-content" aria-hidden="true" data-bay-state={state}>
-          <div className="faceplate-tag">{def.codename.toUpperCase()}</div>
-          <FaceGlyph state={state} />
-          <div className="faceplate-status">{STATUS_WORD[state]}</div>
-          <div className="faceplate-diff">{DIFFICULTY_LABELS[instance.difficulty].toUpperCase()}</div>
-          {state === 'active' && <div className="faceplate-cta">TAP TO OPERATE</div>}
-        </div>
-      </Html>
+      {/* decorative printed face for plates without a live surface */}
+      {!liveFace && (
+        <Html
+          transform
+          position={[0, 0, 0.004]}
+          scale={0.0715}
+          wrapperClass="faceplate-wrap"
+          className="faceplate-html"
+          zIndexRange={[10, 0]}
+        >
+          <div className="faceplate-content" aria-hidden="true" data-bay-state={state}>
+            <div className="faceplate-tag">{def.codename.toUpperCase()}</div>
+            <FaceGlyph state={state} />
+            <div className="faceplate-status">{STATUS_WORD[state]}</div>
+            <div className="faceplate-diff">{DIFFICULTY_LABELS[instance.difficulty].toUpperCase()}</div>
+            {state === 'active' && <div className="faceplate-cta">TAP TO OPERATE</div>}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

@@ -60,7 +60,9 @@ export function zoomPoseFromWorld(
   plateWorldPos: [number, number, number],
   plateWorldNormal: [number, number, number],
 ): { position: [number, number, number]; target: [number, number, number] } {
-  const dist = 1.62;
+  // fits the full plate (1.36 world units) inside a 42° fov with margin for
+  // the chrome strips — the face reads whole, title to status line
+  const dist = 1.95;
   return {
     position: [
       plateWorldPos[0] + plateWorldNormal[0] * dist,

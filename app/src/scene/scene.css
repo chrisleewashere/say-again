@@ -62,6 +62,32 @@
   border-color: var(--amber-deep);
 }
 
+/* zoom HUD: chrome strip while operating an in-scene face */
+.scene-zoom-hud {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.scene-status {
+  margin: 0;
+  color: var(--text-low);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  max-width: 380px;
+}
+
+.scene-a11y-btn {
+  background: transparent;
+  border-color: var(--bg-3);
+  color: var(--text-low);
+  font-size: 0.85em;
+}
+
 /* alarm flash overlay: sits above the opaque canvas, below the chrome */
 .scene-flash-overlay {
   position: absolute;

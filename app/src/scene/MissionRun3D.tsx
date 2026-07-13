@@ -1,9 +1,11 @@
 /**
  * The Field Case shell: same mission logic as the classic 2D shell (shared
  * useMissionRunner hook), presented as an opened analog spycraft briefcase.
- * Gameplay interaction happens in a FLAT screen-space panel (iOS Safari
- * drops touches on CSS-3D-transformed DOM); the 3D plates are the object's
- * decorative faces and status lamps.
+ * Modules play ON their plates: each face is a canvas texture and taps
+ * arrive via the scene raycaster (iPad-reliable — iOS Safari drops touches
+ * on CSS-3D-transformed DOM, but mesh raycasting is native canvas input).
+ * A flat screen-space panel remains as the accessibility path (VoiceOver /
+ * switch access) and the fallback for modules without an in-scene face.
  */
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -23,6 +25,7 @@ import { TallyOverlay } from '../slp/TallyOverlay';
 import type { TallyEvent } from '../slp/db';
 import { CameraRig, type CameraPose } from './CameraRig';
 import { Faceplate, type BayState } from './Faceplate';
+import { getFace } from './faces';
 import { FieldCase } from './FieldCase';
 import { baySlots, OVERVIEW_CAMERA } from './layout';
 import { applyPatina } from './materials';
@@ -111,6 +114,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   useMissionSfx(runner);
   const quality = useQuality();
   const [zoomed, setZoomed] = useState<CameraPose | null>(null);
+  const [faceStatus, setFaceStatus] = useState('');
+  const [a11yPanel, setA11yPanel] = useState(false);
   const poseGetters = useRef(new Map<number, () => CameraPose | null>());
   const slots = useMemo(() => baySlots(runner.instances.length), [runner.instances.length]);
   const reducedMotion =
@@ -129,6 +134,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     if (runner.moduleIndex !== prevModuleIndex.current) {
       prevModuleIndex.current = runner.moduleIndex;
       setZoomed(null);
+      setA11yPanel(false);
+      setFaceStatus('');
     }
   }, [runner.moduleIndex]);
 
@@ -147,6 +154,13 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     }
   }
 
+  const activeInstance = runner.instances[runner.moduleIndex];
+  const activeHasFace = getFace(activeInstance.moduleId) !== undefined;
+  const zoomedIn = zoomed !== null && !runner.finished;
+  // Flat DOM panel: the a11y path (VoiceOver/switch), and the gameplay
+  // surface for any module without an in-scene face yet.
+  const panelOpen = zoomedIn && (!activeHasFace || a11yPanel);
+
   const renderPlate = (i: number) => (
     <Faceplate
       key={i}
@@ -155,6 +169,17 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       state={bayState(i)}
       onSelect={(pose) => openActivePanel(pose)}
       registerPoseGetter={(get) => poseGetters.current.set(i, get)}
+      zoomed={i === runner.moduleIndex && zoomedIn}
+      faceHandlers={
+        i === runner.moduleIndex
+          ? {
+              onSolved: runner.handleSolved,
+              onStrike: runner.handleStrike,
+              setStatus: setFaceStatus,
+              disabled: runner.finished || panelOpen,
+            }
+          : undefined
+      }
     />
   );
 
@@ -166,14 +191,12 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     ? runner.instances.map((_, i) => (slots[i].parent === 'lid' ? renderPlate(i) : null))
     : null;
 
-  const activeInstance = runner.instances[runner.moduleIndex];
   const activeDef = getModule(activeInstance.moduleId);
   const lampState: LampState = runner.moduleFailedFlash
     ? 'failed'
     : runner.alarmFlash
       ? 'wrong'
       : 'active';
-  const panelOpen = zoomed !== null && !runner.finished;
 
   return (
     <main className="scene-screen">
@@ -229,9 +252,10 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
         </div>
       )}
 
-      {/* The live module plays in this FLAT panel (plain DOM, no 3D
-          transforms — reliable touch on iPad). Kept mounted while hidden so
-          in-module progress survives stepping back to look at the case. */}
+      {/* Flat DOM panel: the accessibility path (full semantic module UI for
+          VoiceOver/switch users) and the surface for modules without an
+          in-scene face. Kept mounted while hidden so in-module progress
+          survives stepping back to look at the case. */}
       <div className={`scene-panel${panelOpen ? '' : ' scene-panel-hidden'}`} aria-hidden={!panelOpen}>
         <div className="scene-panel-frame">
           <span className="scene-panel-screw scene-panel-screw-tl" aria-hidden="true" />
@@ -257,9 +281,21 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
 
       <div className="scene-chrome scene-chrome-bottom">
         {panelOpen ? (
-          <button className="scene-back-btn" onClick={() => setZoomed(null)}>
+          <button className="scene-back-btn" onClick={() => { setZoomed(null); setA11yPanel(false); }}>
             &larr; Step back to the case
           </button>
+        ) : zoomedIn && activeHasFace ? (
+          <div className="scene-zoom-hud">
+            <button className="scene-back-btn" onClick={() => setZoomed(null)}>
+              &larr; Step back
+            </button>
+            <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
+            <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
+            <p className="scene-status" role="status">{faceStatus}</p>
+            <button className="scene-a11y-btn" onClick={() => setA11yPanel(true)}>
+              Accessible panel
+            </button>
+          </div>
         ) : (
           <div className="scene-hint-row">
             <p className="scene-hint" role="status">

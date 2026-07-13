@@ -60,7 +60,8 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
       }
       setPicked(session.modules.map((m) => ({ moduleId: m.moduleId, difficulty: m.difficulty })));
       setTimerMode(session.timerMode);
-      setMaxStrikes(session.maxStrikes ?? 3);
+      // clamp: logbook records from before the per-module rework may say 5
+      setMaxStrikes(Math.min(3, Math.max(1, session.maxStrikes ?? 1)));
       if (!namesDirtyRef.current) {
         setStudentA(session.studentA);
         setStudentB(session.studentB);
@@ -203,10 +204,10 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
             </button>
           ))}
         </div>
-        <div className="filter-row" role="group" aria-label="Alarm tolerance">
-          {[2, 3, 5].map((n) => (
+        <div className="filter-row" role="group" aria-label="Wrong answers allowed per puzzle">
+          {[1, 2, 3].map((n) => (
             <button key={n} className={`chip${maxStrikes === n ? ' chip-on' : ''}`} aria-pressed={maxStrikes === n} onClick={() => { configDirtyRef.current = true; setMaxStrikes(n); }}>
-              {n} alarms allowed
+              {n} wrong fails a puzzle
             </button>
           ))}
         </div>
