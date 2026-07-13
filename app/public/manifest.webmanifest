@@ -1,7 +1,7 @@
 {
-  "name": "Keep Yapping & Everyone Escapes",
-  "short_name": "Keep Yapping",
-  "description": "A two-player cooperative talking game: one of you sees the puzzle, one of you holds the manual. Keep yapping and everyone escapes.",
+  "name": "Say Again?",
+  "short_name": "Say Again?",
+  "description": "A two-player cooperative talking game: one of you sees the puzzle, one of you holds the manual. When a clue doesn't land — say it again.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

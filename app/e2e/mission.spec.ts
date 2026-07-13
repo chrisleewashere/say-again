@@ -20,7 +20,7 @@ async function readMissionCode(page: Page): Promise<string> {
 
 test('home screen renders with core actions', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /keep yapping/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /say again/i })).toBeVisible();
   await expect(page.getByRole('button', { name: 'New Mission' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Logbook' })).toBeVisible();
 });

@@ -23,12 +23,12 @@ export function Logbook({ onBack }: LogbookProps) {
   async function exportCsv() {
     // export the FULL table, not just the rows shown on screen
     const csv = sessionsToCsv(await allSessions());
-    const file = new File([csv], `keep-yapping-sessions-${new Date().toISOString().slice(0, 10)}.csv`, {
+    const file = new File([csv], `say-again-sessions-${new Date().toISOString().slice(0, 10)}.csv`, {
       type: 'text/csv',
     });
     try {
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Keep Yapping session data' });
+        await navigator.share({ files: [file], title: 'Say Again? session data' });
       } else {
         const url = URL.createObjectURL(file);
         const a = document.createElement('a');

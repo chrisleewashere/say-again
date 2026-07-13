@@ -27,8 +27,8 @@ const badge = (s, withWordmark) => `
   <circle cx="512" cy="${withWordmark ? 440 : 512}" r="300" fill="none" stroke="#ffb347" stroke-width="34"/>
   <circle cx="512" cy="${withWordmark ? 440 : 512}" r="234" fill="none" stroke="#3b4a5e" stroke-width="12" stroke-dasharray="34 44"/>
   <path d="M400 ${withWordmark ? 452 : 524} l78 78 l146 -168" fill="none" stroke="#ffb347" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
-  ${withWordmark ? `<text x="512" y="850" text-anchor="middle" font-family="Avenir Next, Segoe UI, sans-serif" font-size="92" font-weight="700" fill="#f3f6f9">KEEP YAPPING</text>
-  <text x="512" y="940" text-anchor="middle" font-family="Avenir Next, Segoe UI, sans-serif" font-size="58" fill="#8494a5">&amp; EVERYONE ESCAPES</text>` : ''}
+  ${withWordmark ? `<text x="512" y="850" text-anchor="middle" font-family="Avenir Next, Segoe UI, sans-serif" font-size="118" font-weight="700" fill="#f3f6f9">SAY AGAIN?</text>
+  <text x="512" y="940" text-anchor="middle" font-family="Avenir Next, Segoe UI, sans-serif" font-size="52" fill="#8494a5">CO-OP FIELD MISSIONS</text>` : ''}
 </svg>`;
 
 const page512 = (svg, size) => `<!doctype html><html><body style="margin:0">${svg}</body></html>`;

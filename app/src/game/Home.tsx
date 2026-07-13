@@ -22,8 +22,8 @@ export function Home({ onNewMission, onReplayCode, onLogbook, onSettings, onHowT
           <path d="M40 62 l14 14 l26 -30" fill="none" stroke="var(--amber)" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h1 className="home-title">Keep Yapping<br />&amp; Everyone Escapes</h1>
-      <p className="home-sub">A two-player talking game. One of you sees the puzzle. One of you holds the manual. Keep yapping.</p>
+      <h1 className="home-title">Say Again?</h1>
+      <p className="home-sub">A two-player talking game. One of you sees the puzzle. One of you holds the manual. When a clue doesn&rsquo;t land — say it again.</p>
 
       <div className="home-actions">
         <button className="btn-primary home-big-btn" onClick={onNewMission}>New Mission</button>

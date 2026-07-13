@@ -46,8 +46,8 @@ describe('manifest.webmanifest', () => {
   const manifest = JSON.parse(manifestRaw);
 
   it('has the required installability fields', () => {
-    expect(manifest.name).toBe('Keep Yapping & Everyone Escapes');
-    expect(manifest.short_name).toBe('Keep Yapping');
+    expect(manifest.name).toBe('Say Again?');
+    expect(manifest.short_name).toBe('Say Again?');
     expect(manifest.display).toBe('standalone');
     expect(manifest.orientation).toBe('any');
     expect(manifest.background_color).toBe('#0f141a');

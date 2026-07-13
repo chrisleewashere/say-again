@@ -40,7 +40,7 @@ try {
       headerTemplate: '<span></span>',
       footerTemplate:
         '<div style="width:100%;text-align:center;font-size:9px;color:#444;">' +
-        'Keep Yapping &amp; Everyone Escapes — Field Manual · page ' +
+        'Say Again? — Field Manual · page ' +
         '<span class="pageNumber"></span> of <span class="totalPages"></span></div>',
       printBackground: true,
     });

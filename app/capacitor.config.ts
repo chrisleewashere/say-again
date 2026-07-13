@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.keepyapping.escapes',
-  appName: 'Keep Yapping',
+  appId: 'com.chrislee.sayagain',
+  appName: 'Say Again?',
   webDir: 'dist',
   ios: {
     contentInset: 'automatic',

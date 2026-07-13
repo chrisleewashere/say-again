@@ -1,11 +1,11 @@
-# Keep Yapping & Everyone Escapes
+# Say Again?
 
 An original two-player cooperative communication game built for high-school speech-language
 therapy — styled as playful spy missions.
 
 **The premise:** the *Field Agent* holds an iPad and sees the puzzles. The *Handler* holds a
 printed Field Manual and sees the rules. Neither has the whole picture. The only way through
-is to keep yapping — describing precisely, following multi-step directions, asking clarifying
+is to talk it out — describing precisely, following multi-step directions, asking clarifying
 questions, and repairing misunderstandings. That information gap *is* the therapy.
 
 ## What's here

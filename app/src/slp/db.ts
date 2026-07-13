@@ -39,6 +39,8 @@ class KyDatabase extends Dexie {
   sessions!: EntityTable<SessionRecord, 'id'>;
 
   constructor() {
+    // Historical database name from before the "Say Again?" rename — must
+    // never change, or existing devices would lose their session logs.
     super('keep-yapping');
     this.version(1).stores({
       sessions: '++id, startedAt, studentA, studentB, outcome',

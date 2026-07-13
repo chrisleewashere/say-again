@@ -1,5 +1,5 @@
 /**
- * Keep Yapping & Everyone Escapes — service worker.
+ * Say Again? — service worker.
  *
  * Hand-written, zero dependencies. Strategy:
  *  - install: precache the minimal app shell, then skipWaiting so the new

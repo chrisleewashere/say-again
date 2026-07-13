@@ -29,7 +29,7 @@ In Xcode:
 
 1. Select the **App** target → **Signing & Capabilities**.
 2. Check **Automatically manage signing** and choose your **Team**.
-3. Bundle identifier is `com.keepyapping.escapes` — change it if you prefer (it must be
+3. Bundle identifier is `com.chrislee.sayagain` — change it if you prefer (it must be
    globally unique; reverse-DNS of a domain you control is conventional).
 
 ## Test on a real iPad
@@ -41,9 +41,9 @@ In Xcode:
 ## App Store Connect setup
 
 1. Go to https://appstoreconnect.apple.com → **My Apps** → **+** → **New App**.
-   - Platform: iOS · Name: **Keep Yapping & Everyone Escapes** (or your preferred store
+   - Platform: iOS · Name: **Say Again?** (or your preferred store
      name if taken) · Language: English · Bundle ID: the one from Xcode · SKU: anything
-     (e.g. `keep-yapping-1`).
+     (e.g. `say-again-1`).
 2. Fill in the listing using `docs/APP_STORE_METADATA.md` (description, keywords,
    category **Education**, age rating questionnaire — everything answers "No", yielding 4+).
 3. **App Privacy** section: declare **Data Not Collected** (true — see

@@ -1,4 +1,4 @@
-# Privacy Policy — Keep Yapping & Everyone Escapes
+# Privacy Policy — Say Again?
 
 _Last updated: July 2026_
 
@@ -6,7 +6,7 @@ _Last updated: July 2026_
 
 ## Data collection
 
-Keep Yapping & Everyone Escapes does not collect, transmit, sell, or share any data.
+Say Again? does not collect, transmit, sell, or share any data.
 The app:
 
 - has **no accounts** and no sign-in,

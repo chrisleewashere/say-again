@@ -4,9 +4,10 @@ Copy-paste source for the App Store Connect listing.
 
 ## Name
 
-**Keep Yapping & Everyone Escapes**
+**Say Again?**
 
-(If unavailable, alternates: "Keep Yapping: Escape Together", "Keep Yapping — Co-op Escape".)
+(An unrelated dormant app is named "Say Again" — the question mark distinguishes ours.
+If Apple still objects, alternates: "Say Again? — Co-op Missions", "Say Again? Field Missions".)
 
 ## Subtitle (30 chars max)
 
@@ -22,9 +23,9 @@ Answer "No" to all questionnaire items → **4+**.
 
 ## Description
 
-> One of you sees the puzzles. One of you holds the manual. Nobody has the whole picture — so keep yapping!
+> One of you sees the puzzles. One of you holds the manual. Nobody has the whole picture — so when a clue doesn't land, say it again.
 >
-> Keep Yapping & Everyone Escapes is a two-player cooperative game built around real communication. The Field Agent holds the device and describes what they see. The Handler holds the printed Field Manual (free PDF, two reading levels) and works out the rules. Cracking the safe, bypassing the laser grid, and spotting the secret contact all take one skill above all: talking clearly and asking good questions.
+> Say Again? is a two-player cooperative game built around real communication. The Field Agent holds the device and describes what they see. The Handler holds the printed Field Manual (free PDF, two reading levels) and works out the rules. Cracking the safe, bypassing the laser grid, and spotting the secret contact all take one skill above all: talking clearly and asking good questions.
 >
 > Designed by-and-for school speech-language pathologists — and genuinely fun for any pair who likes escape rooms.
 >

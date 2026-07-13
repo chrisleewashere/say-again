@@ -18,7 +18,8 @@ export function HowTo({ onBack }: HowToProps) {
           This is a two-player talking game. The <strong>Field Agent</strong> holds this device and
           sees the puzzles. The <strong>Handler</strong> holds the printed Field Manual and can see
           the rules — but not the screen. Neither of you has the whole picture, so the only way
-          through is to keep yapping.
+          through is to talk it out — and when something doesn&rsquo;t land, ask your partner to
+          say it again.
         </p>
       </section>
 
