@@ -208,6 +208,10 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
           in-module progress survives stepping back to look at the case. */}
       <div className={`scene-panel${panelOpen ? '' : ' scene-panel-hidden'}`} aria-hidden={!panelOpen}>
         <div className="scene-panel-frame">
+          <span className="scene-panel-screw scene-panel-screw-tl" aria-hidden="true" />
+          <span className="scene-panel-screw scene-panel-screw-tr" aria-hidden="true" />
+          <span className="scene-panel-screw scene-panel-screw-bl" aria-hidden="true" />
+          <span className="scene-panel-screw scene-panel-screw-br" aria-hidden="true" />
           <div className="scene-panel-head">
             <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
