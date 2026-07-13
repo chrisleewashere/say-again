@@ -261,3 +261,64 @@
   border-color: #3a332b;
   background: #1b1712;
 }
+
+/* ---------- case hardware text (decorative Html on the 3D object) -------- */
+.case-phosphor {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  letter-spacing: 0.18em;
+  color: #7ee2a8;
+  text-shadow: 0 0 10px rgba(126, 226, 168, 0.75);
+  background: #0a0f0b;
+  border-radius: 6px;
+  padding: 4px 14px;
+}
+
+.case-etched {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  letter-spacing: 0.22em;
+  color: #6e5836;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.35);
+  white-space: nowrap;
+}
+
+.case-etched-dark {
+  color: #5c4a2e;
+}
+
+/* the rear plate's parent group carries a half-turn; counter-mirror the text */
+.case-etched-rear {
+  transform: scaleX(-1);
+}
+
+/* end-of-mission grade stamp over the case */
+.scene-grade-stamp {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scene-grade-stamp span {
+  font-family: var(--font-mono);
+  font-size: min(38vh, 34vw);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--amber);
+  border: 0.06em solid var(--amber-deep);
+  border-radius: 0.18em;
+  padding: 0.02em 0.14em;
+  transform: rotate(-8deg);
+  opacity: 0.92;
+  text-shadow: 0 0 40px rgba(255, 179, 71, 0.35);
+  animation: stamp-in 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes stamp-in {
+  from { transform: rotate(-8deg) scale(2.2); opacity: 0; }
+  to { transform: rotate(-8deg) scale(1); opacity: 0.92; }
+}

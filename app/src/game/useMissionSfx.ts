@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { playSfx } from '../audio/useSfx';
+import { haptic } from './haptics';
 import type { MissionRunner } from './useMissionRunner';
 
 /**
@@ -16,6 +17,7 @@ export function useMissionSfx(runner: MissionRunner): void {
     // increase is a wrong answer.
     if (runner.moduleStrikes > prevStrikes.current) {
       playSfx('strikeBuzz');
+      haptic('wrong');
     }
     prevStrikes.current = runner.moduleStrikes;
   }, [runner.moduleStrikes]);
@@ -23,6 +25,7 @@ export function useMissionSfx(runner: MissionRunner): void {
   useEffect(() => {
     if (runner.solvedCount > prevSolved.current) {
       playSfx('solveKachunk');
+      haptic('solve');
     }
     prevSolved.current = runner.solvedCount;
   }, [runner.solvedCount]);
@@ -31,6 +34,7 @@ export function useMissionSfx(runner: MissionRunner): void {
     const failed = runner.results.filter((r) => r.failed).length;
     if (failed > prevFailed.current) {
       playSfx('lockdown');
+      haptic('fail');
     }
     prevFailed.current = failed;
   }, [runner.results]);

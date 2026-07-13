@@ -14,7 +14,7 @@ import { DIFFICULTY_LABELS } from '../engine/types';
 import type { BaySlot } from './layout';
 import { PLATE_SIZE, zoomPoseFromWorld } from './layout';
 import type { CameraPose } from './CameraRig';
-import { FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, LAMP_RED, SCREW_STEEL } from './materials';
+import { CASE_ALUMINUM_WORN, FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, LAMP_RED, SCREW_STEEL } from './materials';
 import './scene.css';
 
 export type BayState = 'locked' | 'active' | 'solved' | 'failed';
@@ -144,6 +144,19 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter 
       <mesh position={[screwOff, 0, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
+
+      {/* lockdown bars bolt across a failed module */}
+      {state === 'failed' &&
+        [-0.28, 0.28].map((y) => (
+          <RoundedBox
+            key={y}
+            args={[s + 0.34, 0.14, 0.05]}
+            radius={0.02}
+            position={[0, y, 0.045]}
+            rotation={[0, 0, y > 0 ? 0.1 : -0.1]}
+            material={CASE_ALUMINUM_WORN}
+          />
+        ))}
 
       {/* tap target: only the lit module opens */}
       {state === 'active' && (

@@ -3,7 +3,7 @@
  * entirely from primitives (no external assets). Geometry only; module
  * faceplates mount via <Faceplate> at slots from layout.ts.
  */
-import { RoundedBox } from '@react-three/drei';
+import { Html, RoundedBox } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import type * as React from 'react';
@@ -42,6 +42,10 @@ function CornerScrew({ x, z, brass = false }: { x: number; z: number; brass?: bo
 interface FieldCaseProps {
   /** 0 = closed, 1 = fully open; the shell animates this for the ritual */
   openAmount: number;
+  /** mission code — etched on the brass plate and the rear serial plate */
+  code: string;
+  /** phosphor countdown text (null = untimed mission, readout shows READY) */
+  clock: string | null;
   /** current mission alarm state, for the jewel-lamp strip */
   strikes: number;
   maxStrikes: number;
@@ -52,7 +56,7 @@ interface FieldCaseProps {
   lidChildren?: React.ReactNode;
 }
 
-export function FieldCase({ openAmount, strikes, maxStrikes, alarmFlash, baseChildren, lidChildren }: FieldCaseProps) {
+export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmFlash, baseChildren, lidChildren }: FieldCaseProps) {
   const lidRef = useRef<THREE.Group>(null);
   const flashRef = useRef<THREE.PointLight>(null);
 
@@ -119,6 +123,22 @@ export function FieldCase({ openAmount, strikes, maxStrikes, alarmFlash, baseChi
       </group>
       <pointLight ref={flashRef} position={[0, CASE_H + 0.4, CASE_D / 2 + 0.5]} color="#ff5a5a" intensity={0} distance={4} />
 
+      {/* phosphor countdown tube inset on the front edge */}
+      <group position={[1.35, CASE_H - 0.14, CASE_D / 2 + 0.012]}>
+        <RoundedBox args={[0.72, 0.22, 0.03]} radius={0.02} material={CASE_ALUMINUM_WORN} />
+        <Html transform occlude position={[0, 0, 0.018]} scale={0.07} wrapperClass="faceplate-wrap" zIndexRange={[10, 0]}>
+          <div className="case-phosphor" aria-hidden="true">{clock ?? 'READY'}</div>
+        </Html>
+      </group>
+
+      {/* rear serial plate — only readable by turning the case (spatial-language bait) */}
+      <group position={[0.9, CASE_H / 2, -CASE_D / 2 - 0.012]} rotation={[0, Math.PI, 0]}>
+        <RoundedBox args={[1.3, 0.3, 0.02]} radius={0.02} material={BRASS} />
+        <Html transform occlude position={[0, 0, 0.014]} scale={0.07} wrapperClass="faceplate-wrap" zIndexRange={[10, 0]}>
+          <div className="case-etched case-etched-rear" aria-hidden="true">FIELD CASE · UNIT {code}</div>
+        </Html>
+      </group>
+
       {baseChildren}
 
       {/* ---- lid (hinged at the back edge) ---- */}
@@ -134,6 +154,17 @@ export function FieldCase({ openAmount, strikes, maxStrikes, alarmFlash, baseChi
             {/* brass mission plate riveted inside the lid, low edge */}
             <group position={[0, -LID_H / 2 - 0.03, 0.1]}>
               <RoundedBox args={[1.5, 0.03, 0.42]} radius={0.01} material={BRASS} />
+              <Html
+                transform
+                occlude
+                position={[0, -0.022, 0]}
+                rotation={[Math.PI / 2, 0, 0]}
+                scale={0.07}
+                wrapperClass="faceplate-wrap"
+                zIndexRange={[10, 0]}
+              >
+                <div className="case-etched case-etched-dark" aria-hidden="true">MISSION {code}</div>
+              </Html>
             </group>
           </group>
         </group>

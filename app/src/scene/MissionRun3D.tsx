@@ -11,12 +11,13 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { playSfx } from '../audio/useSfx';
 import { useQuality } from '../quality/useQuality';
-import { gradeMission } from '../engine/grade';
+import { gradeMission, type MissionGrade } from '../engine/grade';
 import { getModule } from '../engine/registry';
 import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types';
+import { haptic } from '../game/haptics';
 import { MissionHeader } from '../game/MissionRun';
 import { ModuleLamp, type LampState } from '../game/ModuleLamp';
-import { useMissionRunner } from '../game/useMissionRunner';
+import { formatClock, useMissionRunner } from '../game/useMissionRunner';
 import { useMissionSfx } from '../game/useMissionSfx';
 import { TallyOverlay } from '../slp/TallyOverlay';
 import type { TallyEvent } from '../slp/db';
@@ -24,6 +25,7 @@ import { CameraRig, type CameraPose } from './CameraRig';
 import { Faceplate, type BayState } from './Faceplate';
 import { FieldCase } from './FieldCase';
 import { baySlots, OVERVIEW_CAMERA } from './layout';
+import { applyPatina } from './materials';
 import './scene.css';
 
 /** Feeds real frame timestamps to the auto quality ladder. */
@@ -84,12 +86,24 @@ interface MissionRun3DProps {
 }
 
 export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
+  const [ritualGrade, setRitualGrade] = useState<MissionGrade | null>(null);
+  const finishTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (finishTimer.current) clearTimeout(finishTimer.current);
+  }, []);
+
+  // Hold the debrief for a beat: lamps settle, the grade stamps over the
+  // case, THEN the report card. Reduced motion keeps it brief.
   const finishWithSfx = useMemo(
     () =>
       (result: MissionResult, tallies: TallyEvent[]) => {
         const grade = gradeMission(result.outcome, result.modules);
-        playSfx(grade.letter !== 'I' && grade.score >= 80 ? 'missionWin' : 'lidCreak');
-        onFinish(result, tallies);
+        const good = grade.letter !== 'I' && grade.score >= 80;
+        playSfx(good ? 'missionWin' : 'lidCreak');
+        haptic(good ? 'win' : 'fail');
+        setRitualGrade(grade);
+        const quick = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        finishTimer.current = setTimeout(() => onFinish(result, tallies), quick ? 900 : 2600);
       },
     [onFinish],
   );
@@ -103,6 +117,10 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     a11y.reducedMotion ||
     (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const openAmount = useOpenAmount(reducedMotion);
+
+  useEffect(() => {
+    applyPatina();
+  }, []);
 
   // Step back to overview when the mission advances, so the plate lamp
   // (green or red) and the next lit module both read before re-opening.
@@ -185,6 +203,8 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
 
         <FieldCase
           openAmount={openAmount}
+          code={config.code}
+          clock={runner.timed ? formatClock(runner.secondsLeft) : null}
           strikes={runner.moduleStrikes}
           maxStrikes={config.maxStrikes}
           alarmFlash={runner.alarmFlash}
@@ -202,6 +222,12 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       </Canvas>
 
       {runner.alarmFlash && <div className="scene-flash-overlay" aria-hidden="true" />}
+
+      {ritualGrade && (
+        <div className="scene-grade-stamp" role="img" aria-label={`Mission grade ${ritualGrade.letter}`}>
+          <span>{ritualGrade.letter}</span>
+        </div>
+      )}
 
       {/* The live module plays in this FLAT panel (plain DOM, no 3D
           transforms — reliable touch on iPad). Kept mounted while hidden so

@@ -5,11 +5,12 @@
  * in the polish pass.
  */
 import * as THREE from 'three';
+import { aluminumRoughnessTexture, phenolicColorTexture } from './textures';
 
 export const CASE_ALUMINUM = new THREE.MeshPhysicalMaterial({
   color: '#9aa3ab',
   metalness: 0.85,
-  roughness: 0.38,
+  roughness: 0.5,
   clearcoat: 0.15,
   clearcoatRoughness: 0.6,
 });
@@ -74,3 +75,23 @@ export function lampMaterial(color: string, intensity: number): THREE.MeshStanda
 export const LAMP_GREEN = lampMaterial('#4cc38a', 1.6);
 export const LAMP_AMBER = lampMaterial('#ffb347', 1.4);
 export const LAMP_RED = lampMaterial('#ff6b6b', 1.6);
+
+
+/**
+ * Field-used patina: procedural canvas maps (needs a DOM, so applied lazily
+ * from the scene rather than at module load — safe for tests/SSR).
+ */
+let patinaApplied = false;
+
+export function applyPatina(): void {
+  if (patinaApplied || typeof document === 'undefined') return;
+  patinaApplied = true;
+  const brushed = aluminumRoughnessTexture();
+  brushed.repeat.set(2, 2);
+  CASE_ALUMINUM.roughnessMap = brushed;
+  CASE_ALUMINUM.needsUpdate = true;
+  CASE_ALUMINUM_WORN.roughnessMap = brushed;
+  CASE_ALUMINUM_WORN.needsUpdate = true;
+  FACEPLATE_PHENOLIC.map = phenolicColorTexture();
+  FACEPLATE_PHENOLIC.needsUpdate = true;
+}
