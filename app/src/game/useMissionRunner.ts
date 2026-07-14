@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { instantiateMission } from '../engine/mission';
+import { clampRepairDrills, staticModuleFlags } from '../engine/staticProtocol';
 import type { MissionConfig, MissionResult, ModuleResult, PuzzleInstance } from '../engine/types';
 import type { TallyEvent } from '../slp/db';
 
@@ -26,6 +27,10 @@ export interface MissionRunner {
   alarmFlash: boolean;
   /** module indices already solved (always 0..moduleIndex-1; sequential) */
   solvedCount: number;
+  /** Static Protocol: true when the CURRENT module runs repair drills */
+  isStatic: boolean;
+  /** Static Protocol stack depth for this mission (0 = off) */
+  repairDrills: number;
   handleSolved: () => void;
   handleStrike: () => void;
   handleTally: (event: TallyEvent) => void;
@@ -37,6 +42,11 @@ export function useMissionRunner(
   onFinish: (result: MissionResult, tallies: TallyEvent[]) => void,
 ): MissionRunner {
   const instances = useMemo(() => instantiateMission(config), [config]);
+  const repairDrills = clampRepairDrills(config.repairDrills);
+  const staticFlags = useMemo(
+    () => staticModuleFlags(config.code, instances.length, repairDrills),
+    [config.code, instances.length, repairDrills],
+  );
   const startedAt = useMemo(() => Date.now(), []);
   const [moduleIndex, setModuleIndex] = useState(0);
   const [moduleStrikes, setModuleStrikes] = useState(0);
@@ -191,6 +201,8 @@ export function useMissionRunner(
     endConfirm,
     alarmFlash,
     solvedCount: results.filter((r) => r.solved).length,
+    isStatic: staticFlags[moduleIndex] ?? false,
+    repairDrills,
     handleSolved,
     handleStrike,
     handleTally,

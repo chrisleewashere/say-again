@@ -19,6 +19,7 @@ import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types
 import { haptic } from '../game/haptics';
 import { MissionHeader } from '../game/MissionRun';
 import { ModuleLamp, type LampState } from '../game/ModuleLamp';
+import { StaticBadge } from '../game/StaticBadge';
 import { formatClock, useMissionRunner } from '../game/useMissionRunner';
 import { useMissionSfx } from '../game/useMissionSfx';
 import { TallyOverlay } from '../slp/TallyOverlay';
@@ -266,6 +267,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
           <span className="scene-panel-screw scene-panel-screw-br" aria-hidden="true" />
           <div className="scene-panel-head">
             <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
+            {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
           </div>
           <div className="scene-panel-body">
@@ -292,6 +294,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
               &larr; Step back
             </button>
             <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
+            {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
             <p className="scene-status" role="status">{faceStatus}</p>
             <button className="scene-a11y-btn" onClick={() => setA11yPanel(true)}>

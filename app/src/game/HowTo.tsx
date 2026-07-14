@@ -34,6 +34,16 @@ export function HowTo({ onBack }: HowToProps) {
       </section>
 
       <section className="card setup-section">
+        <h2>Static on the channel</h2>
+        <p className="home-sub" style={{ maxWidth: 'none' }}>
+          Your teacher can turn on the <strong>Static Protocol</strong>. Puzzles marked STATIC have a
+          noisy channel: the Handler answers the Agent&rsquo;s first description with &ldquo;Say
+          again?&rdquo; and the Agent has to explain it a <em>new</em> way — different words, more
+          detail. The manual has the Handler&rsquo;s script.
+        </p>
+      </section>
+
+      <section className="card setup-section">
         <h2>Wrong answers, grades, and time</h2>
         <p className="home-sub" style={{ maxWidth: 'none' }}>
           Every wrong choice flashes the module's corner lamp red — and each module only forgives

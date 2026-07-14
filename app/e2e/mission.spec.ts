@@ -132,3 +132,42 @@ test('accessibility settings toggle html classes and persist', async ({ page }) 
   await page.reload();
   await expect(page.locator('html')).toHaveClass(/a11y-large-text/);
 });
+
+test('debrief tapes: order the stills, link them, retell, and grade A+', async ({ page }) => {
+  const { generateDebriefTapes, solveDebriefTapes } = await import('../src/modules/debriefTapes/logic');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New Mission' }).click();
+  await page.getByRole('button', { name: /Add Debrief Tapes, Agent/ }).click();
+  await page.getByRole('button', { name: 'Start Mission' }).click();
+
+  const code = await readMissionCode(page);
+  const instance = generateDebriefTapes(hashSeed(`${code}:0:debrief-tapes:2`), 2);
+  const answer = solveDebriefTapes(instance.state);
+
+  // lock the stills in report order (buttons are named by their description)
+  for (const idx of answer.order) {
+    const letter = instance.state.scenes[idx].letter;
+    await page.getByRole('button', { name: new RegExp(`^Still ${letter}:`) }).click();
+  }
+  // choose each junction's connective
+  for (const c of answer.connectives) {
+    await page.getByRole('button', { name: c.toUpperCase(), exact: true }).click();
+  }
+  // the retell prompt gates the solve — recording the tape finishes the module
+  await expect(page.getByText('Record the debrief.', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Tape recorded/ }).click();
+
+  await expect(page.getByRole('heading', { name: /Mission grade: A\+/ })).toBeVisible({ timeout: 15_000 });
+});
+
+test('static protocol setting marks modules and persists to the logbook', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New Mission' }).click();
+  await page.getByRole('button', { name: /Add Laser Grid Bypass, Rookie/ }).click();
+  await page.getByRole('button', { name: /Static: 2/ }).click();
+  await page.getByRole('button', { name: 'Start Mission' }).click();
+
+  // single-module missions always mark their one module
+  await expect(page.locator('.static-badge')).toBeVisible();
+  await expect(page.locator('.static-badge')).toHaveAccessibleName(/2 clarification requests/);
+});

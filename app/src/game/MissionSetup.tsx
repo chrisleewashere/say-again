@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { allModules } from '../engine/registry';
+import { clampRepairDrills } from '../engine/staticProtocol';
 import { findSessionByCode } from '../slp/db';
 import { estimateMinutes, makeTimer, newMissionCode } from '../engine/mission';
 import {
@@ -20,7 +21,7 @@ interface MissionSetupProps {
   onBack: () => void;
 }
 
-const TARGET_FILTERS: (TherapyTarget | 'all')[] = ['all', 'receptive', 'expressive', 'pragmatics', 'vocabulary'];
+const TARGET_FILTERS: (TherapyTarget | 'all')[] = ['all', 'receptive', 'expressive', 'pragmatics', 'vocabulary', 'narrative'];
 
 export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps) {
   const modules = allModules();
@@ -28,6 +29,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const [picked, setPicked] = useState<MissionModuleSpec[]>([]);
   const [timerMode, setTimerMode] = useState<TimerMode>('relaxed');
   const [maxStrikes, setMaxStrikes] = useState(1);
+  const [repairDrills, setRepairDrills] = useState(0);
   const [studentA, setStudentA] = useState('');
   const [studentB, setStudentB] = useState('');
   const [replayNotice, setReplayNotice] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
       setTimerMode(session.timerMode);
       // clamp: logbook records from before the per-module rework may say 5
       setMaxStrikes(Math.min(3, Math.max(1, session.maxStrikes ?? 1)));
+      setRepairDrills(clampRepairDrills(session.repairDrills));
       if (!namesDirtyRef.current) {
         setStudentA(session.studentA);
         setStudentB(session.studentB);
@@ -97,6 +100,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         timer: makeTimer(timerMode, picked),
         maxStrikes,
         hintsAllowed: true,
+        repairDrills,
       },
       { a: studentA.trim(), b: studentB.trim() },
     );
@@ -211,6 +215,18 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
             </button>
           ))}
         </div>
+        <div className="filter-row" role="group" aria-label="Static Protocol repair drills">
+          {[0, 1, 2, 3].map((n) => (
+            <button key={n} className={`chip${repairDrills === n ? ' chip-on' : ''}`} aria-pressed={repairDrills === n} onClick={() => { configDirtyRef.current = true; setRepairDrills(n); }}>
+              {n === 0 ? 'Static off' : `Static: ${n} say-again${n > 1 ? 's' : ''}`}
+            </button>
+          ))}
+        </div>
+        <p className="setup-note">
+          Static Protocol: on marked puzzles the Handler answers the Agent&rsquo;s first description
+          with neutral &ldquo;say again?&rdquo; requests (the manual has the script) — the Agent must
+          re-explain in different words. Builds repair skills.
+        </p>
       </section>
 
       <button className="btn-primary home-big-btn" disabled={picked.length === 0} onClick={start}>

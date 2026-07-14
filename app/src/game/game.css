@@ -395,3 +395,35 @@
 .debrief-grade-low .debrief-grade-letter { color: var(--danger); }
 .debrief-grade-i { border-color: var(--line); }
 .debrief-grade-i .debrief-grade-letter { color: var(--text-mid); }
+
+/* Static Protocol badge — marks a repair-drill module in both shells */
+.static-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  letter-spacing: 0.18em;
+  color: var(--amber);
+  border: 1.5px dashed var(--amber-deep);
+  border-radius: 6px;
+  padding: 3px 9px;
+}
+
+.static-badge svg rect { fill: var(--amber); }
+
+.static-badge-pips { display: inline-flex; gap: 3px; }
+
+.static-badge-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.setup-note {
+  color: var(--text-low);
+  font-size: 0.88em;
+  margin: 8px 2px 0;
+  max-width: 640px;
+}

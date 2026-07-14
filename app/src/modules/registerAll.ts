@@ -1,5 +1,6 @@
 import { registerModule } from '../engine/registry';
 import { alarmBypassModule } from './alarmBypass';
+import { debriefTapesModule } from './debriefTapes';
 import { escapeRouteModule } from './escapeRoute';
 import { idCheckModule } from './idCheck';
 import { keypadCipherModule } from './keypadCipher';
@@ -24,4 +25,5 @@ export function registerAllModules(): void {
   registerModule(alarmBypassModule);
   registerModule(escapeRouteModule);
   registerModule(idCheckModule);
+  registerModule(debriefTapesModule);
 }

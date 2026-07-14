@@ -40,6 +40,23 @@ Get a pair of students from zero to their first escape in about five minutes.
 | Escape Route | Spatial language, giving directions | listening, checking |
 | Spot the Contact | Describing people & attributes | questions, elimination |
 
+## The Static Protocol (repair drills)
+
+In Mission Setup you can turn on **Static** (1–3 "say-agains"). Marked puzzles show a dashed
+STATIC badge with one dot per required request: the Handler answers the Agent's first
+description only with the scripted neutral requests from the manual's Static Protocol page
+("Say again?" → "What do you mean?" → "I didn't understand that"), and the Agent must
+re-explain **a new way** each time. This is the stacked-clarification paradigm from the
+conversational-repair literature — use it once the pair is comfortable, and raise the depth
+as repair skills grow.
+
+## Debrief Tapes (narrative)
+
+The eighth puzzle targets **storytelling & sequencing**: shuffled surveillance stills, a
+report template in the manual, and a spoken retell to finish. The retell is *not* machine-
+judged — the Handler (and you) are the judges. Listen for story grammar: who/where, the
+problem, the plan, what they did, how it ended, and the linking words (then / so / but).
+
 ## Therapy moves that work well
 
 - **Breakdown = teaching moment.** When a module fails and seals red, resist fixing it. Ask:
@@ -59,3 +76,7 @@ Get a pair of students from zero to their first escape in about five minutes.
 - **Export CSV** shares a spreadsheet-ready file via the share sheet (AirDrop it to your
   laptop) for IEP progress reporting.
 - Everything is on-device only. Delete any row, or everything, whenever you want.
+- **Measure with your tally, not the grade.** The letter grade motivates students; your
+  correct/prompted/incorrect tallies and functional observations are the outcome data.
+  Research note: performance on structured puzzles doesn't automatically index open
+  conversation — the debrief conversation after each mission is where you'll hear transfer.

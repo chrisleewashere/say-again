@@ -11,6 +11,7 @@ import { allModules } from '../src/engine/registry';
 import { registerAllModules } from '../src/modules/registerAll';
 import type { ManualBlock, ManualEdition } from '../src/engine/types';
 import { DIFFICULTY_LABELS, THERAPY_TARGET_LABELS } from '../src/engine/types';
+import { REPAIR_REQUESTS } from '../src/engine/staticProtocol';
 
 registerAllModules();
 
@@ -51,6 +52,44 @@ function renderBlock(block: ManualBlock): string {
         block.caption,
       )}</figcaption></figure>`;
   }
+}
+
+/** Static badge as it appears on marked modules, for the protocol page. */
+const staticBadgeSvg = `
+<svg viewBox="0 0 20 14" width="34" height="24" aria-hidden="true">
+  <rect x="1" y="5" width="2.6" height="4" rx="1" fill="#111"/>
+  <rect x="5.4" y="2" width="2.6" height="10" rx="1" fill="#111"/>
+  <rect x="9.8" y="6.5" width="2.6" height="2.5" rx="1" fill="#111"/>
+  <rect x="14.2" y="3.5" width="2.6" height="7" rx="1" fill="#111"/>
+</svg>`;
+
+function staticProtocolSection(editionKey: 'standard' | 'simplified'): string {
+  const phrases = REPAIR_REQUESTS.map((r) => `<strong>&ldquo;${esc(r)}&rdquo;</strong>`);
+  if (editionKey === 'standard') {
+    return `
+  <p>Some channels are noisy. When a module shows the STATIC mark ${staticBadgeSvg} next to its
+  status lamp, run this protocol before acting on the Agent's FIRST description of the puzzle:</p>
+  <ol class="steps">
+    <li>Do not act yet. Respond only: ${phrases[0]}</li>
+    <li>If your teacher set static to 2 or higher, answer the next attempt with: ${phrases[1]}</li>
+    <li>At static 3, answer once more with: ${phrases[2]}</li>
+    <li>The Agent must explain it a NEW way each time — repeating the same words does not clear static. Different words, more detail, or a comparison ("it's shaped like a...") all count.</li>
+    <li>After the last request, the channel is clear: proceed with the puzzle as normal.</li>
+  </ol>
+  <div class="callout callout-tip"><span class="callout-tag">TIP</span> The static mark shows one dot per
+  required request, and your teacher will tell you the number. Stay neutral — don't hint at what confused
+  you. The Agent has to figure out how to say it better. That is the whole exercise.</div>`;
+  }
+  return `
+  <p>Some puzzles show the STATIC mark ${staticBadgeSvg}. It means: pretend you did not understand.</p>
+  <ol class="steps">
+    <li>When the Agent first tells you about the puzzle, say: ${phrases[0]}</li>
+    <li>If the mark has 2 dots, next say: ${phrases[1]}</li>
+    <li>If it has 3 dots, then say: ${phrases[2]}</li>
+    <li>The Agent must say it a new way each time. Same words again = still static.</li>
+    <li>After that, play the puzzle like normal.</li>
+  </ol>
+  <div class="callout callout-tip"><span class="callout-tag">TIP</span> Do not give hints. The Agent's job is to find better words.</div>`;
 }
 
 function renderEdition(editionKey: 'standard' | 'simplified'): string {
@@ -138,6 +177,11 @@ function renderEdition(editionKey: 'standard' | 'simplified'): string {
       : `<div class="callout callout-tip"><span class="callout-tag">TIP</span> Always go down the list from the top. Read the words above the list first:
   if it says &ldquo;use the first rule that fits&rdquo;, stop when one fits. If it is a checklist, do every step.</div>`
   }
+</section>
+
+<section class="module-section">
+  <header class="module-head"><h2>The Static Protocol</h2></header>
+  ${staticProtocolSection(editionKey)}
 </section>
 
 <section class="module-section">

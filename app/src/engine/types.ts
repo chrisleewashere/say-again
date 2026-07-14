@@ -1,13 +1,14 @@
 import type * as React from 'react';
 
 /** Communication targets an SLP can filter modules by. */
-export type TherapyTarget = 'receptive' | 'expressive' | 'pragmatics' | 'vocabulary';
+export type TherapyTarget = 'receptive' | 'expressive' | 'pragmatics' | 'vocabulary' | 'narrative';
 
 export const THERAPY_TARGET_LABELS: Record<TherapyTarget, string> = {
   receptive: 'Following directions',
   expressive: 'Describing & directing',
   pragmatics: 'Clarifying & repair',
   vocabulary: 'Vocabulary & categories',
+  narrative: 'Storytelling & sequencing',
 };
 
 export type Difficulty = 1 | 2 | 3;
@@ -154,6 +155,14 @@ export interface MissionConfig {
    */
   maxStrikes: number;
   hintsAllowed: boolean;
+  /**
+   * The Static Protocol (repair drills): 0 = off; 1-3 = on marked modules the
+   * Handler answers the Agent's first description(s) with that many escalating
+   * neutral clarification requests before acting. Which modules are marked is
+   * seeded from the mission code (engine/staticProtocol.ts). Optional for
+   * stored-session compatibility.
+   */
+  repairDrills?: number;
 }
 
 /**

@@ -49,6 +49,7 @@ function App() {
         outcome: result.outcome,
         timerMode: result.timerMode,
         maxStrikes: config.maxStrikes,
+        repairDrills: config.repairDrills ?? 0,
         grade: grade.letter,
         gradeScore: grade.score,
         studentA: students.a,

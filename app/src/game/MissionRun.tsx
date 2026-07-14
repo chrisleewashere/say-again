@@ -3,6 +3,7 @@ import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types
 import { TallyOverlay } from '../slp/TallyOverlay';
 import type { TallyEvent } from '../slp/db';
 import { ModuleLamp, type LampState } from './ModuleLamp';
+import { StaticBadge } from './StaticBadge';
 import { formatClock, useMissionRunner, type MissionRunner } from './useMissionRunner';
 import { useMissionSfx } from './useMissionSfx';
 import './game.css';
@@ -60,6 +61,7 @@ export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
       <div className="run-module-area">
         <div className="run-module-frame">
           <div className="run-module-lamp">
+            {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
           </div>
           <def.Component

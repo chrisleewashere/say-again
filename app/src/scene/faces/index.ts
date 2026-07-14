@@ -7,6 +7,7 @@
  */
 import type { ModuleFace } from './types';
 import { alarmBypassFace } from './alarmBypass';
+import { debriefTapesFace } from './debriefTapes';
 import { escapeRouteFace } from './escapeRoute';
 import { idCheckFace } from './idCheck';
 import { keypadCipherFace } from './keypadCipher';
@@ -22,6 +23,7 @@ const FACES: Record<string, ModuleFace<never>> = {
   'alarm-bypass': alarmBypassFace as ModuleFace<never>,
   'escape-route': escapeRouteFace as ModuleFace<never>,
   'id-check': idCheckFace as ModuleFace<never>,
+  'debrief-tapes': debriefTapesFace as ModuleFace<never>,
 };
 
 export function getFace(moduleId: string): ModuleFace | undefined {
