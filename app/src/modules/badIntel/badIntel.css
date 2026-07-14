@@ -1,0 +1,160 @@
+.bad-intel {
+  --bi-ink: var(--text-hi);
+  --bi-dim: var(--text-low);
+}
+
+/* ---------- step progress ---------- */
+
+.bi-steps {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 12px 0 4px;
+}
+
+.bi-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-low);
+  background: var(--bg-2);
+}
+
+.bi-step-now {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.bi-step-done {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.bi-step-flagged {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ---------- panel grid ---------- */
+
+.bi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.bi-card {
+  position: relative;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 8px 8px;
+  min-height: 150px;
+  cursor: pointer;
+  color: var(--bi-ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.bi-card:not(:disabled):hover,
+.bi-card:not(:disabled):focus-visible {
+  border-color: var(--amber-deep);
+}
+
+.bi-card-serviced {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.bi-art {
+  width: 100%;
+  max-width: 110px;
+  height: auto;
+  display: block;
+}
+
+.bi-card-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-mono);
+}
+
+.bi-tag {
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  padding: 0 8px;
+  line-height: 1.4;
+}
+
+.bi-set {
+  color: var(--bi-dim);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.bi-type-name {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--bi-dim);
+}
+
+.bi-done-badge {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  z-index: 1;
+  background: var(--success);
+  color: #0c1f16;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- flag button ---------- */
+
+.bi-flag-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 12px 22px;
+  min-height: var(--touch);
+  color: var(--danger);
+  border: 2px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  cursor: pointer;
+}
+
+.bi-flag-btn:not(:disabled):hover,
+.bi-flag-btn:not(:disabled):focus-visible {
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.bi-flag-glyph {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}

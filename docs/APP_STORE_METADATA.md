@@ -30,7 +30,7 @@ Answer "No" to all questionnaire items → **4+**.
 > Designed by-and-for school speech-language pathologists — and genuinely fun for any pair who likes escape rooms.
 >
 > FOR STUDENTS AND FAMILIES
-> • Seven original spy-mission puzzles, each with three difficulty levels
+> • Ten original spy-mission puzzles, each with three difficulty levels
 > • Endless variety — every mission code builds a different set of puzzles
 > • No timer unless you want one, and nothing ever explodes: a tripped alarm just means "talk it over and try again"
 > • Swap roles every mission — describing and directing are both skills

@@ -1,5 +1,7 @@
 import { registerModule } from '../engine/registry';
 import { alarmBypassModule } from './alarmBypass';
+import { assetInterviewModule } from './assetInterview';
+import { badIntelModule } from './badIntel';
 import { debriefTapesModule } from './debriefTapes';
 import { escapeRouteModule } from './escapeRoute';
 import { idCheckModule } from './idCheck';
@@ -26,4 +28,6 @@ export function registerAllModules(): void {
   registerModule(escapeRouteModule);
   registerModule(idCheckModule);
   registerModule(debriefTapesModule);
+  registerModule(badIntelModule);
+  registerModule(assetInterviewModule);
 }

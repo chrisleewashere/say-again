@@ -7,6 +7,8 @@
  */
 import type { ModuleFace } from './types';
 import { alarmBypassFace } from './alarmBypass';
+import { assetInterviewFace } from './assetInterview';
+import { badIntelFace } from './badIntel';
 import { debriefTapesFace } from './debriefTapes';
 import { escapeRouteFace } from './escapeRoute';
 import { idCheckFace } from './idCheck';
@@ -24,6 +26,8 @@ const FACES: Record<string, ModuleFace<never>> = {
   'escape-route': escapeRouteFace as ModuleFace<never>,
   'id-check': idCheckFace as ModuleFace<never>,
   'debrief-tapes': debriefTapesFace as ModuleFace<never>,
+  'bad-intel': badIntelFace as ModuleFace<never>,
+  'asset-interview': assetInterviewFace as ModuleFace<never>,
 };
 
 export function getFace(moduleId: string): ModuleFace | undefined {

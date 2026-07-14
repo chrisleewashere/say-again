@@ -1,0 +1,124 @@
+.asset-interview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 620px;
+}
+
+.ai-statement {
+  position: relative;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px 12px;
+}
+
+.ai-stamp {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  border: 2px solid var(--amber-deep);
+  border-radius: 6px;
+  padding: 4px 12px;
+  margin-bottom: 10px;
+  transform: rotate(-2deg);
+}
+
+.ai-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-fact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-height: var(--touch);
+}
+
+.ai-fact-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  color: var(--text-hi);
+}
+
+.ai-fact-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ai-fact-field {
+  color: var(--text-low);
+  font-size: 0.88em;
+}
+
+.ai-fact-value {
+  font-weight: 600;
+}
+
+.ai-verdicts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.ai-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: var(--bg-2);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  min-height: var(--touch);
+  cursor: pointer;
+}
+
+.ai-verdict:not(:disabled):hover,
+.ai-verdict:not(:disabled):focus-visible {
+  border-color: var(--amber-deep);
+}
+
+.ai-verdict-selected {
+  border-color: var(--amber);
+  background: var(--bg-3);
+}
+
+.ai-verdict-committed {
+  border-color: var(--success);
+}
+
+.ai-verdict-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  color: var(--text-hi);
+}
+
+.ai-verdict-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ai-verdict-label {
+  font-size: 0.94em;
+}
+
+.ai-commit {
+  align-self: flex-start;
+  padding: 12px 26px;
+}
