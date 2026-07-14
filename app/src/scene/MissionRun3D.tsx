@@ -17,6 +17,7 @@ import { gradeMission, type MissionGrade } from '../engine/grade';
 import { getModule } from '../engine/registry';
 import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types';
 import { haptic } from '../game/haptics';
+import { HintPanel } from '../game/HintPanel';
 import { MissionHeader } from '../game/MissionRun';
 import { ModuleLamp, type LampState } from '../game/ModuleLamp';
 import { StaticBadge } from '../game/StaticBadge';
@@ -268,6 +269,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
           <div className="scene-panel-head">
             <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
             {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
+            {config.hintsAllowed && <HintPanel runner={runner} />}
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
           </div>
           <div className="scene-panel-body">
@@ -297,6 +299,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
             {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
             <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
             <p className="scene-status" role="status">{faceStatus}</p>
+            {config.hintsAllowed && <HintPanel runner={runner} />}
             <button className="scene-a11y-btn" onClick={() => setA11yPanel(true)}>
               Accessible panel
             </button>

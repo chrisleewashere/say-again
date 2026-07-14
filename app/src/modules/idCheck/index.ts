@@ -14,4 +14,7 @@ export const idCheckModule: ModuleDefinition<IdCheckState, IdCheckAnswer> = {
   validate: validateIdCheck,
   Component: IdCheck,
   manual: idCheckManual,
+  hints: [
+    'Describe one suspect at a time — top to bottom: hat, glasses, hair, clothing. The Handler crosses people off their checklist until one remains.',
+  ],
 };

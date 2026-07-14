@@ -20,4 +20,7 @@ export const vaultDialModule: ModuleDefinition<VaultDialState, VaultDialAnswer> 
   validate: validateVaultDial,
   Component: VaultDial,
   manual: vaultDialManual,
+  hints: [
+    'Describe one gem at a time — its shape, its marking, and its size tag — and let the Handler finish computing before you touch the keypad.',
+  ],
 };

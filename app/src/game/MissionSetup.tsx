@@ -30,6 +30,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   const [timerMode, setTimerMode] = useState<TimerMode>('relaxed');
   const [maxStrikes, setMaxStrikes] = useState(1);
   const [repairDrills, setRepairDrills] = useState(0);
+  const [hintsAllowed, setHintsAllowed] = useState(true);
   const [studentA, setStudentA] = useState('');
   const [studentB, setStudentB] = useState('');
   const [replayNotice, setReplayNotice] = useState<string | null>(null);
@@ -99,7 +100,7 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
         modules: picked,
         timer: makeTimer(timerMode, picked),
         maxStrikes,
-        hintsAllowed: true,
+        hintsAllowed,
         repairDrills,
       },
       { a: studentA.trim(), b: studentB.trim() },
@@ -227,6 +228,13 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
           with neutral &ldquo;say again?&rdquo; requests (the manual has the script) — the Agent must
           re-explain in different words. Builds repair skills.
         </p>
+        <div className="filter-row" role="group" aria-label="In-game hints">
+          {[true, false].map((on) => (
+            <button key={String(on)} className={`chip${hintsAllowed === on ? ' chip-on' : ''}`} aria-pressed={hintsAllowed === on} onClick={() => { configDirtyRef.current = true; setHintsAllowed(on); }}>
+              {on ? 'Hints available' : 'No hints'}
+            </button>
+          ))}
+        </div>
       </section>
 
       <button className="btn-primary home-big-btn" disabled={picked.length === 0} onClick={start}>

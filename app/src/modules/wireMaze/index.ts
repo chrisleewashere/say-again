@@ -14,4 +14,7 @@ export const wireMazeModule: ModuleDefinition<WireMazeState, WireMazeAnswer> = {
   validate: validateWireMaze,
   Component: WireMaze,
   manual: wireMazeManual,
+  hints: [
+    'Work the wire list from the top and use the FIRST rule that fits — then stop. Count the wires and say each color, pattern, and letter out loud before anyone says “cut”.',
+  ],
 };

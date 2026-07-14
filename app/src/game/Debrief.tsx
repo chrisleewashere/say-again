@@ -15,6 +15,7 @@ export function Debrief({ result, onReplaySame, onNewMission, onHome }: DebriefP
   const copy = gradeCopy(grade);
   const minutes = Math.max(1, Math.round((result.endedAt - result.startedAt) / 60000));
   const timedOut = result.outcome === 'timeout';
+  const anyWrong = result.modules.some((m) => m.strikes > 0 || m.failed);
 
   return (
     <main className="screen debrief-screen">
@@ -56,6 +57,22 @@ export function Debrief({ result, onReplaySame, onNewMission, onHome }: DebriefP
               </li>
             );
           })}
+        </ul>
+      </section>
+
+      {/* Debriefing on process AND content is a core recommendation of the
+          educational escape-room literature — the talk after the mission is
+          where the therapy transfer happens. */}
+      <section className="card debrief-card debrief-talk" aria-labelledby="debrief-talk-h">
+        <h2 id="debrief-talk-h">Talk it over</h2>
+        <ul className="debrief-prompts">
+          <li>What was the hardest thing to explain today — and what finally made it land?</li>
+          <li>
+            {anyWrong
+              ? 'Pick one wrong pick: what question would have caught it before committing?'
+              : 'Which clarifying question saved you the most trouble?'}
+          </li>
+          <li>Swap roles next mission — what will you do differently in the other seat?</li>
         </ul>
       </section>
 

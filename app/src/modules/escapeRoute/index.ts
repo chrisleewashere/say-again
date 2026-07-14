@@ -20,4 +20,7 @@ export const escapeRouteModule: ModuleDefinition<EscapeRouteState, EscapeRouteAn
   validate: validateEscapeRoute,
   Component: EscapeRoute,
   manual: escapeRouteManual,
+  hints: [
+    'Read the floor code to your Handler, then move ONE step at a time. Repeat each direction back before you step — sensors reset you to the start.',
+  ],
 };

@@ -122,6 +122,13 @@ export interface ModuleDefinition<S = unknown, A = unknown> {
   Component: React.ComponentType<ModuleComponentProps<S, A>>;
   manual: ManualSection;
   /**
+   * Escalating hints, revealed one per press of the shell's Hint button
+   * (after the generic manual-pointer hint the shell always provides).
+   * Hints coach the COMMUNICATION (what to describe, what to ask) — they
+   * never reveal instance answers. Uses are logged per module.
+   */
+  hints?: string[];
+  /**
    * Optional descriptor for how the module mounts into the 3D Field Case rack.
    * Omit it (or omit any field) and the module gets the standard mount:
    * `slots: 1` (single rack slot) and `bezel: 'standard'`. `slots: 2` requests

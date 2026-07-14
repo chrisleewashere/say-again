@@ -20,4 +20,7 @@ export const alarmBypassModule: ModuleDefinition<AlarmBypassState, AlarmBypassAn
   validate: validateAlarmBypass,
   Component: AlarmBypass,
   manual: alarmBypassManual,
+  hints: [
+    'Play the signal again and name each glyph out loud (crescent, key, bolt, eye). The Handler translates the sequence — agree on all of it before the first press.',
+  ],
 };

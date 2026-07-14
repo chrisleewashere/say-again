@@ -2,6 +2,7 @@ import { getModule } from '../engine/registry';
 import type { A11ySettings, MissionConfig, MissionResult } from '../engine/types';
 import { TallyOverlay } from '../slp/TallyOverlay';
 import type { TallyEvent } from '../slp/db';
+import { HintPanel } from './HintPanel';
 import { ModuleLamp, type LampState } from './ModuleLamp';
 import { StaticBadge } from './StaticBadge';
 import { formatClock, useMissionRunner, type MissionRunner } from './useMissionRunner';
@@ -73,6 +74,7 @@ export function MissionRun({ config, a11y, onFinish }: MissionRunProps) {
             disabled={runner.finished}
           />
         </div>
+        {config.hintsAllowed && <HintPanel runner={runner} />}
       </div>
 
       <TallyOverlay onTally={runner.handleTally} />

@@ -20,4 +20,7 @@ export const debriefTapesModule: ModuleDefinition<DebriefTapesState, DebriefTape
   validate: validateDebriefTapes,
   Component: DebriefTapes,
   manual: debriefTapesManual,
+  hints: [
+    "Describe each still's CORNER MARKER — the marker tells the Handler which report entry it is. The letters are just names; they say nothing about order.",
+  ],
 };

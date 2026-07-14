@@ -23,4 +23,7 @@ export const passwordInterceptModule: ModuleDefinition<
   validate: validatePasswordIntercept,
   Component: PasswordIntercept,
   manual: passwordInterceptManual,
+  hints: [
+    "Read the card number to your Handler. Their table gives a clue about the right word's MEANING — talk about what each word means, not how it looks.",
+  ],
 };

@@ -427,3 +427,15 @@
   margin: 8px 2px 0;
   max-width: 640px;
 }
+
+/* debrief talk-it-over prompts */
+.debrief-talk h2 { margin: 0 0 8px; font-size: 1.05em; }
+.debrief-prompts { margin: 0; padding-left: 1.3em; }
+.debrief-prompts li { margin-bottom: 8px; }
+
+/* hint panel */
+.hint-panel { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.hint-btn { font-size: 0.85em; border-style: dashed; }
+.hint-text { margin: 0; color: var(--text-low); font-size: 0.9em; max-width: 560px; }
+.scene-zoom-hud .hint-panel, .scene-panel-head .hint-panel { margin-top: 0; }
+.scene-zoom-hud .hint-text { max-width: 320px; }

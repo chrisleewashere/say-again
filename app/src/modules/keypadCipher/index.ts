@@ -20,4 +20,7 @@ export const keypadCipherModule: ModuleDefinition<KeypadCipherState, KeypadCiphe
   validate: validateKeypadCipher,
   Component: KeypadCipher,
   manual: keypadCipherManual,
+  hints: [
+    'Read every word key aloud first. The Handler sorts them with the category rules — agree on the WHOLE order before pressing anything.',
+  ],
 };

@@ -31,6 +31,10 @@ export interface MissionRunner {
   isStatic: boolean;
   /** Static Protocol stack depth for this mission (0 = off) */
   repairDrills: number;
+  /** hints taken on the CURRENT module (resets when the mission advances) */
+  hintsUsed: number;
+  /** reveal the next hint for the current module (logged in its result) */
+  takeHint: () => void;
   handleSolved: () => void;
   handleStrike: () => void;
   handleTally: (event: TallyEvent) => void;
@@ -60,6 +64,8 @@ export function useMissionRunner(
   const tallies = useRef<TallyEvent[]>([]);
   const moduleStartRef = useRef(Date.now());
   const moduleStrikesRef = useRef(0);
+  const moduleHintsRef = useRef(0);
+  const [hintsUsed, setHintsUsed] = useState(0);
   const finishedRef = useRef(false);
 
   const timed = config.timer.mode !== 'relaxed';
@@ -92,7 +98,7 @@ export function useMissionRunner(
         difficulty: inst.difficulty,
         solved: false,
         strikes: i === moduleIndex ? moduleStrikesRef.current : 0,
-        hintsUsed: 0,
+        hintsUsed: i === moduleIndex ? moduleHintsRef.current : 0,
         elapsedMs: i === moduleIndex ? Date.now() - moduleStartRef.current : 0,
       });
     }
@@ -145,7 +151,9 @@ export function useMissionRunner(
     } else {
       moduleStartRef.current = Date.now();
       moduleStrikesRef.current = 0;
+      moduleHintsRef.current = 0;
       setModuleStrikes(0);
+      setHintsUsed(0);
       setModuleIndex(moduleIndex + 1);
     }
   }
@@ -157,7 +165,7 @@ export function useMissionRunner(
       difficulty: instance.difficulty,
       solved: true,
       strikes: moduleStrikesRef.current,
-      hintsUsed: 0,
+      hintsUsed: moduleHintsRef.current,
       elapsedMs: Date.now() - moduleStartRef.current,
     });
   }
@@ -179,7 +187,7 @@ export function useMissionRunner(
         solved: false,
         failed: true,
         strikes: moduleStrikesRef.current,
-        hintsUsed: 0,
+        hintsUsed: moduleHintsRef.current,
         elapsedMs: Date.now() - moduleStartRef.current,
       });
     }
@@ -187,6 +195,11 @@ export function useMissionRunner(
 
   function handleTally(event: TallyEvent) {
     tallies.current.push(event);
+  }
+
+  function takeHint() {
+    moduleHintsRef.current += 1;
+    setHintsUsed(moduleHintsRef.current);
   }
 
   return {
@@ -203,6 +216,8 @@ export function useMissionRunner(
     solvedCount: results.filter((r) => r.solved).length,
     isStatic: staticFlags[moduleIndex] ?? false,
     repairDrills,
+    hintsUsed,
+    takeHint,
     handleSolved,
     handleStrike,
     handleTally,
