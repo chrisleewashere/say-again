@@ -3,7 +3,23 @@
 Everything in this repo is ready to build; the signing and upload steps must happen on your
 Mac because they require Xcode and your Apple Developer identity.
 
-## One-time setup
+## Run it FREE first (no Developer Program needed)
+
+You do not need the $99 program to play the native app — only to put it on the App Store.
+With just Xcode and a free Apple ID you can:
+
+- **Run in the iPad simulator**: do the Build steps below, then in Xcode pick any iPad
+  simulator from the device menu and press **Run**. No signing required at all.
+- **Sideload to your real iPad**: in Xcode → Settings → Accounts, add your Apple ID (free).
+  In Signing & Capabilities pick the "Personal Team" it creates, plug in the iPad, Run.
+  The first time, the iPad will ask you to trust the developer profile
+  (Settings → General → VPN & Device Management). Free-team builds expire after **7 days** —
+  just press Run again to re-sign. Fine for classroom piloting; enroll in the paid program
+  when you're ready to publish.
+
+Hold off on the "One-time setup" enrollment until launch — everything else works without it.
+
+## One-time setup (for the actual App Store submission)
 
 1. **Apple Developer Program** — enroll at https://developer.apple.com/programs/ ($99/yr).
    Use the Apple ID you want the app published under. Enrollment approval can take a day or
@@ -16,12 +32,16 @@ Mac because they require Xcode and your Apple Developer identity.
 
 ```bash
 cd app
-npm install
+npm install              # required BEFORE opening Xcode — the iOS project
+                         # resolves Capacitor plugins out of node_modules
 npm test                 # everything should be green
 npm run build            # produces app/dist
 npx cap sync ios         # copies dist + plugins into the Xcode project
 npx cap open ios         # opens the Xcode workspace
 ```
+
+Native-only features to check while testing: haptic taps on solves/strikes (Taptic Engine),
+and the screen staying awake during a mission (it should never dim mid-heist).
 
 ## Configure signing (first time only)
 

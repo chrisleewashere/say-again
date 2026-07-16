@@ -26,6 +26,7 @@
 
 .scene-chrome-top {
   top: 0;
+  padding-top: calc(14px + env(safe-area-inset-top));
   background: linear-gradient(to bottom, rgba(10, 13, 17, 0.9), transparent);
 }
 
@@ -33,7 +34,7 @@
   bottom: 0;
   display: flex;
   justify-content: center;
-  padding-bottom: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
   background: linear-gradient(to top, rgba(10, 13, 17, 0.85), transparent);
 }
 

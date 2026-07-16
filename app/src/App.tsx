@@ -1,5 +1,6 @@
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { Debrief } from './game/Debrief';
+import { setKeepAwake } from './game/keepAwake';
 import { Home } from './game/Home';
 import { HowTo } from './game/HowTo';
 import { MissionRun } from './game/MissionRun';
@@ -30,6 +31,12 @@ function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' });
   const [a11y, updateA11y] = useA11y();
   const [scenePref, sceneMode, setScenePref] = useSceneMode();
+
+  // The screen must not dim while the pair talks through a mission.
+  useEffect(() => {
+    void setKeepAwake(screen.name === 'play');
+    return () => void setKeepAwake(false);
+  }, [screen.name]);
 
   async function handleFinish(
     config: MissionConfig,
