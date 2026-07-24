@@ -5,6 +5,9 @@
  * Competing looks each add one file here — nothing else changes.
  */
 import type { SceneTheme } from './types';
+import { atomic } from './atomic';
+import { blackline } from './blackline';
+import { noir } from './noir';
 import { tradecraft } from './tradecraft';
 
 export const THEME_STORAGE_KEY = 'ky-scene-theme';
@@ -17,6 +20,9 @@ export function registerTheme(theme: SceneTheme): void {
 }
 
 registerTheme(tradecraft);
+registerTheme(blackline);
+registerTheme(atomic);
+registerTheme(noir);
 
 export function allThemes(): SceneTheme[] {
   return [...REGISTRY.values()];
