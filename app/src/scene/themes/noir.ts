@@ -1,36 +1,45 @@
 import type { SceneTheme } from './types';
 
-/** Signal Noir — competition slot (placeholder values until its agent lands). */
+/**
+ * SIGNAL NOIR — cinematic one-lamp noir. The room is gone; a single hot
+ * tungsten practical rakes across a gunmetal case and falls off to black.
+ * Materials stay desaturated graphite and nickel so the only color in
+ * frame is the status lamps burning like jewels, and a pale CRT phosphor.
+ *
+ * The drama lives in the lighting rig: strong warm key, a whisper of cold
+ * fill, minimal environment. Plates stay dark-but-lifted so the ink-and-
+ * amber puzzle faces still pop under software GL.
+ */
 export const noir: SceneTheme = {
   id: 'noir',
   label: 'Signal Noir',
-  statement: 'Placeholder — agent will replace with the cinematic noir look.',
+  statement: 'One hot lamp in a black room: gunmetal and graphite in hard light, the status jewels the only color left alive.',
 
-  caseShell: { color: '#9aa3ab', metalness: 0.85, roughness: 0.5, clearcoat: 0.15, clearcoatRoughness: 0.6 },
-  caseWorn: { color: '#7e878f', metalness: 0.8, roughness: 0.55 },
-  interior: { color: '#171a1f', metalness: 0.05, roughness: 0.95 },
-  plate: { color: '#221d19', metalness: 0.08, roughness: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.4 },
-  accentMetal: { color: '#b08d57', metalness: 1, roughness: 0.32 },
-  screw: { color: '#8b9096', metalness: 0.95, roughness: 0.4 },
-  screwAccent: { color: '#a8865a', metalness: 0.95, roughness: 0.35 },
-  lampOff: { color: '#2a2f36', metalness: 0.2, roughness: 0.3 },
+  caseShell: { color: '#8d959e', metalness: 0.72, roughness: 0.34, clearcoat: 0.3, clearcoatRoughness: 0.35 },
+  caseWorn: { color: '#6a717a', metalness: 0.68, roughness: 0.44 },
+  interior: { color: '#262b33', metalness: 0.04, roughness: 0.94 },
+  plate: { color: '#2b2a2e', metalness: 0.1, roughness: 0.4, clearcoat: 0.5, clearcoatRoughness: 0.3 },
+  accentMetal: { color: '#b4bac1', metalness: 0.85, roughness: 0.26 },
+  screw: { color: '#959ba2', metalness: 0.8, roughness: 0.36 },
+  screwAccent: { color: '#a6adb4', metalness: 0.8, roughness: 0.3 },
+  lampOff: { color: '#434b57', metalness: 0.3, roughness: 0.26 },
 
-  lampAmber: '#ffb347',
-  lampGreen: '#4cc38a',
-  lampRed: '#ff6b6b',
+  lampAmber: '#ffbe4a',
+  lampGreen: '#3ed489',
+  lampRed: '#f0413a',
 
-  envIntensity: 0.55,
-  ambient: { color: '#3a4250', intensity: 0.25 },
-  key: { color: '#ffd9a0', intensity: 1.15, position: [3.5, 6, 4] },
-  fill: { color: '#7f9ac2', intensity: 0.3, position: [-4, 3, -2] },
+  envIntensity: 0.7,
+  ambient: { color: '#48566b', intensity: 0.55 },
+  key: { color: '#ffdcae', intensity: 3.2, position: [4.2, 5.5, 3.4] },
+  fill: { color: '#8fb3e0', intensity: 0.65, position: [-4.5, 3, -2] },
 
-  backgroundInner: '#151b23',
-  backgroundOuter: '#0a0d11',
-  table: '#101418',
+  backgroundInner: '#141a22',
+  backgroundOuter: '#04060a',
+  table: '#15171b',
 
-  phosphorColor: '#7ee2a8',
-  phosphorGlow: 'rgba(126, 226, 168, 0.75)',
-  etchColor: '#6e5836',
+  phosphorColor: '#cdeeda',
+  phosphorGlow: 'rgba(205, 238, 218, 0.7)',
+  etchColor: '#272c33',
 
   patina: true,
 };

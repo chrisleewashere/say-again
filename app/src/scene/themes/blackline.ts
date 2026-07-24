@@ -1,36 +1,40 @@
 import type { SceneTheme } from './types';
 
-/** Blackline — competition slot (placeholder values until its agent lands). */
+/**
+ * BLACKLINE — modern tactical field kit. Matte near-black polymer shell,
+ * machined gunmetal hardware, one hazard-orange signal line, cold neutral
+ * key light, teal OLED phosphor. Factory-fresh: no patina, zero nostalgia.
+ */
 export const blackline: SceneTheme = {
   id: 'blackline',
   label: 'Blackline',
-  statement: 'Placeholder — agent will replace with the modern-tactical look.',
+  statement: 'Modern covert field kit: matte polymer and gunmetal, one hazard-orange signal line, cold light, teal OLED glow.',
 
-  caseShell: { color: '#9aa3ab', metalness: 0.85, roughness: 0.5, clearcoat: 0.15, clearcoatRoughness: 0.6 },
-  caseWorn: { color: '#7e878f', metalness: 0.8, roughness: 0.55 },
-  interior: { color: '#171a1f', metalness: 0.05, roughness: 0.95 },
-  plate: { color: '#221d19', metalness: 0.08, roughness: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.4 },
-  accentMetal: { color: '#b08d57', metalness: 1, roughness: 0.32 },
-  screw: { color: '#8b9096', metalness: 0.95, roughness: 0.4 },
-  screwAccent: { color: '#a8865a', metalness: 0.95, roughness: 0.35 },
-  lampOff: { color: '#2a2f36', metalness: 0.2, roughness: 0.3 },
+  caseShell: { color: '#434a53', metalness: 0.25, roughness: 0.72, clearcoat: 0.1, clearcoatRoughness: 0.75 },
+  caseWorn: { color: '#363d45', metalness: 0.3, roughness: 0.65 },
+  interior: { color: '#292e36', metalness: 0.05, roughness: 0.92 },
+  plate: { color: '#181c21', metalness: 0.25, roughness: 0.4, clearcoat: 0.35, clearcoatRoughness: 0.3 },
+  accentMetal: { color: '#e06222', metalness: 0.65, roughness: 0.48 },
+  screw: { color: '#6b737d', metalness: 0.95, roughness: 0.32 },
+  screwAccent: { color: '#e8712e', metalness: 0.9, roughness: 0.35 },
+  lampOff: { color: '#2c323a', metalness: 0.35, roughness: 0.28 },
 
-  lampAmber: '#ffb347',
-  lampGreen: '#4cc38a',
-  lampRed: '#ff6b6b',
+  lampAmber: '#ffae33',
+  lampGreen: '#3fd9a0',
+  lampRed: '#ff5a52',
 
-  envIntensity: 0.55,
-  ambient: { color: '#3a4250', intensity: 0.25 },
-  key: { color: '#ffd9a0', intensity: 1.15, position: [3.5, 6, 4] },
-  fill: { color: '#7f9ac2', intensity: 0.3, position: [-4, 3, -2] },
+  envIntensity: 1.05,
+  ambient: { color: '#4d5764', intensity: 0.55 },
+  key: { color: '#eef4fb', intensity: 2.0, position: [3.5, 6, 4] },
+  fill: { color: '#6484ad', intensity: 0.55, position: [-4, 3, -2] },
 
-  backgroundInner: '#151b23',
-  backgroundOuter: '#0a0d11',
-  table: '#101418',
+  backgroundInner: '#242a32',
+  backgroundOuter: '#0b0d10',
+  table: '#15181c',
 
-  phosphorColor: '#7ee2a8',
-  phosphorGlow: 'rgba(126, 226, 168, 0.75)',
-  etchColor: '#6e5836',
+  phosphorColor: '#4de8cf',
+  phosphorGlow: 'rgba(77, 232, 207, 0.7)',
+  etchColor: '#241b12',
 
-  patina: true,
+  patina: false,
 };
