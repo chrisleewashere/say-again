@@ -98,6 +98,25 @@ export function Settings({ a11y, onChange, scenePref, onSceneChange, onBack }: S
             />
             <span aria-hidden="true">{volumePercent}%</span>
           </li>
+          <li className="module-card">
+            <div className="module-card-info">
+              <strong>Mission clock ticking</strong>
+              <p>A quiet clockwork tick during missions for a little pressure. Speeds up when a timer runs low.</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={sfx.ticking}
+              aria-label="Mission clock ticking"
+              className={sfx.ticking ? 'btn-primary' : ''}
+              onClick={() => {
+                sfx.setTicking(!sfx.ticking);
+                if (!sfx.ticking) sfx.play('timerTick');
+              }}
+              disabled={sfx.muted}
+            >
+              {sfx.ticking ? 'On' : 'Off'}
+            </button>
+          </li>
         </ul>
       </section>
 

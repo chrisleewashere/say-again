@@ -20,9 +20,11 @@ export interface AudioPrefs {
   /** Master SFX volume, 0..1. */
   volume: number;
   muted: boolean;
+  /** Mission clockwork tick (ambient time pressure). */
+  ticking: boolean;
 }
 
-export const DEFAULT_AUDIO_PREFS: AudioPrefs = { volume: 0.8, muted: false };
+export const DEFAULT_AUDIO_PREFS: AudioPrefs = { volume: 0.8, muted: false, ticking: true };
 
 /** Clamp to 0..1; non-finite input falls back to the default volume. */
 export function clampVolume(v: number): number {
@@ -52,6 +54,7 @@ export function loadAudioPrefs(storage: StorageLike | null = defaultStorage()): 
     return {
       volume: clampVolume(typeof p.volume === 'number' ? p.volume : DEFAULT_AUDIO_PREFS.volume),
       muted: typeof p.muted === 'boolean' ? p.muted : DEFAULT_AUDIO_PREFS.muted,
+      ticking: typeof p.ticking === 'boolean' ? p.ticking : DEFAULT_AUDIO_PREFS.ticking,
     };
   } catch {
     return { ...DEFAULT_AUDIO_PREFS };
@@ -146,6 +149,45 @@ export function setSfxMuted(muted: boolean): void {
   emit();
 }
 
+/** Enable/disable the mission clockwork tick and persist it. */
+export function setSfxTicking(ticking: boolean): void {
+  prefs = { ...prefs, ticking };
+  if (!ticking) stopTickLoop();
+  saveAudioPrefs(prefs);
+  emit();
+}
+
+/* ------------------------------------------------------------------ */
+/* Mission tick loop: quiet clockwork pulse for ambient time pressure. */
+/* Driven by an interval that plays the timerTick cue; playSfx already  */
+/* respects mute and drops cues while the context is suspended (iOS).   */
+/* ------------------------------------------------------------------ */
+
+let tickTimer: ReturnType<typeof setInterval> | null = null;
+let tickFast = false;
+
+function stopTickLoop(): void {
+  if (tickTimer) {
+    clearInterval(tickTimer);
+    tickTimer = null;
+  }
+}
+
+/**
+ * Start/stop the mission tick. `fast` doubles the cadence (timer running
+ * low). No-ops when the user has ticking disabled.
+ */
+export function setTickLoop(on: boolean, fast = false): void {
+  if (!on || !prefs.ticking) {
+    stopTickLoop();
+    return;
+  }
+  if (tickTimer && fast === tickFast) return;
+  stopTickLoop();
+  tickFast = fast;
+  tickTimer = setInterval(() => playSfx('timerTick'), fast ? 500 : 1000);
+}
+
 /** Current prefs snapshot (immutable — replaced on every change). */
 export function getAudioPrefs(): AudioPrefs {
   return prefs;
@@ -163,9 +205,11 @@ function subscribe(listener: () => void): () => void {
 export interface SfxApi {
   volume: number;
   muted: boolean;
+  ticking: boolean;
   play: (cue: SfxCueName) => void;
   setVolume: (volume: number) => void;
   setMuted: (muted: boolean) => void;
+  setTicking: (ticking: boolean) => void;
 }
 
 /** Subscribe a component to the shared SFX state. */
@@ -174,8 +218,10 @@ export function useSfx(): SfxApi {
   return {
     volume: snapshot.volume,
     muted: snapshot.muted,
+    ticking: snapshot.ticking,
     play: playSfx,
     setVolume: setSfxVolume,
     setMuted: setSfxMuted,
+    setTicking: setSfxTicking,
   };
 }

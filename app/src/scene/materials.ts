@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import { aluminumRoughnessTexture, phenolicColorTexture } from './textures';
+import type { MaterialSpec, SceneTheme } from './themes/types';
 
 export const CASE_ALUMINUM = new THREE.MeshPhysicalMaterial({
   color: '#9aa3ab',
@@ -94,4 +95,53 @@ export function applyPatina(): void {
   CASE_ALUMINUM_WORN.needsUpdate = true;
   FACEPLATE_PHENOLIC.map = phenolicColorTexture();
   FACEPLATE_PHENOLIC.needsUpdate = true;
+}
+
+function clearPatina(): void {
+  if (!patinaApplied) return;
+  patinaApplied = false;
+  CASE_ALUMINUM.roughnessMap = null;
+  CASE_ALUMINUM.needsUpdate = true;
+  CASE_ALUMINUM_WORN.roughnessMap = null;
+  CASE_ALUMINUM_WORN.needsUpdate = true;
+  FACEPLATE_PHENOLIC.map = null;
+  FACEPLATE_PHENOLIC.needsUpdate = true;
+}
+
+/* ------------------------------------------------------------------ */
+/* Theme application: mutate the shared singletons so every mounted    */
+/* mesh picks the look up without re-mounting.                         */
+/* ------------------------------------------------------------------ */
+
+function applySpec(mat: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial, spec: MaterialSpec): void {
+  mat.color.set(spec.color);
+  mat.metalness = spec.metalness;
+  mat.roughness = spec.roughness;
+  if (mat instanceof THREE.MeshPhysicalMaterial) {
+    mat.clearcoat = spec.clearcoat ?? 0;
+    mat.clearcoatRoughness = spec.clearcoatRoughness ?? 0.5;
+  }
+  mat.needsUpdate = true;
+}
+
+function applyLamp(mat: THREE.MeshStandardMaterial, color: string): void {
+  mat.color.set(color);
+  mat.emissive.set(color);
+  mat.needsUpdate = true;
+}
+
+export function applyTheme(theme: SceneTheme): void {
+  applySpec(CASE_ALUMINUM, theme.caseShell);
+  applySpec(CASE_ALUMINUM_WORN, theme.caseWorn);
+  applySpec(CASE_INTERIOR, theme.interior);
+  applySpec(FACEPLATE_PHENOLIC, theme.plate);
+  applySpec(BRASS, theme.accentMetal);
+  applySpec(SCREW_STEEL, theme.screw);
+  applySpec(SCREW_BRASS, theme.screwAccent);
+  applySpec(LAMP_OFF, theme.lampOff);
+  applyLamp(LAMP_AMBER, theme.lampAmber);
+  applyLamp(LAMP_GREEN, theme.lampGreen);
+  applyLamp(LAMP_RED, theme.lampRed);
+  if (theme.patina) applyPatina();
+  else clearPatina();
 }

@@ -30,7 +30,8 @@ import { Faceplate, type BayState } from './Faceplate';
 import { getFace } from './faces';
 import { FieldCase } from './FieldCase';
 import { baySlots, OVERVIEW_CAMERA } from './layout';
-import { applyPatina } from './materials';
+import { applyTheme } from './materials';
+import { activeTheme } from './themes';
 import './scene.css';
 
 /** Feeds real frame timestamps to the auto quality ladder. */
@@ -40,19 +41,19 @@ function QualityFrameBridge({ recordFrame }: { recordFrame: (t: number) => void 
 }
 
 /** Procedural neutral studio environment — zero network fetches. */
-function StudioEnvironment() {
+function StudioEnvironment({ intensity }: { intensity: number }) {
   const { gl, scene } = useThree();
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
     const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = env;
-    scene.environmentIntensity = 0.55;
+    scene.environmentIntensity = intensity;
     return () => {
       scene.environment = null;
       env.dispose();
       pmrem.dispose();
     };
-  }, [gl, scene]);
+  }, [gl, scene, intensity]);
   return null;
 }
 
@@ -127,9 +128,10 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
     (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const openAmount = useOpenAmount(reducedMotion);
 
+  const theme = useMemo(() => activeTheme(), []);
   useEffect(() => {
-    applyPatina();
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
   // Step back to overview when the mission advances, so the plate lamp
   // (green or red) and the next lit module both read before re-opening.
@@ -188,12 +190,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   );
 
   const platesReady = openAmount > 0.98;
-  const basePlates = platesReady
-    ? runner.instances.map((_, i) => (slots[i].parent === 'base' ? renderPlate(i) : null))
-    : null;
-  const lidPlates = platesReady
-    ? runner.instances.map((_, i) => (slots[i].parent === 'lid' ? renderPlate(i) : null))
-    : null;
+  const basePlates = platesReady ? runner.instances.map((_, i) => renderPlate(i)) : null;
 
   const activeDef = getModule(activeInstance.moduleId);
   const lampState: LampState = runner.moduleFailedFlash
@@ -203,7 +200,15 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       : 'active';
 
   return (
-    <main className="scene-screen">
+    <main
+      className="scene-screen"
+      style={{
+        background: `radial-gradient(ellipse at 50% 30%, ${theme.backgroundInner} 0%, ${theme.backgroundOuter} 70%)`,
+        ['--theme-phosphor' as string]: theme.phosphorColor,
+        ['--theme-phosphor-glow' as string]: theme.phosphorGlow,
+        ['--theme-etch' as string]: theme.etchColor,
+      }}
+    >
       <div className="scene-chrome scene-chrome-top">
         <MissionHeader config={config} runner={runner} />
       </div>
@@ -215,18 +220,21 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
         shadows={quality.features.shadows}
       >
         <QualityFrameBridge recordFrame={quality.recordFrame} />
-        {quality.features.reflections && <StudioEnvironment />}
-        <ambientLight intensity={quality.features.reflections ? 0.25 : 0.55} color="#3a4250" />
-        {/* warm desk-lamp key */}
+        {quality.features.reflections && <StudioEnvironment intensity={theme.envIntensity} />}
+        <ambientLight
+          intensity={quality.features.reflections ? theme.ambient.intensity : theme.ambient.intensity + 0.3}
+          color={theme.ambient.color}
+        />
+        {/* themed key light */}
         <directionalLight
-          position={[3.5, 6, 4]}
-          intensity={quality.features.reflections ? 1.15 : 1.5}
-          color="#ffd9a0"
+          position={theme.key.position}
+          intensity={quality.features.reflections ? theme.key.intensity : theme.key.intensity + 0.35}
+          color={theme.key.color}
           castShadow={quality.features.shadows}
           shadow-mapSize={[1024, 1024]}
         />
-        {/* cool dim fill */}
-        <directionalLight position={[-4, 3, -2]} intensity={0.3} color="#7f9ac2" />
+        {/* themed fill */}
+        <directionalLight position={theme.fill.position} intensity={theme.fill.intensity} color={theme.fill.color} />
 
         <FieldCase
           openAmount={openAmount}
@@ -235,14 +243,14 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
           strikes={runner.moduleStrikes}
           maxStrikes={config.maxStrikes}
           alarmFlash={runner.alarmFlash}
+          moduleStates={runner.instances.map((_, i) => bayState(i))}
           baseChildren={basePlates}
-          lidChildren={lidPlates}
         />
 
         {/* table surface */}
         <mesh position={[0, -0.03, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
           <planeGeometry args={[30, 30]} />
-          <meshStandardMaterial color="#101418" roughness={0.9} />
+          <meshStandardMaterial color={theme.table} roughness={0.9} />
         </mesh>
 
         <CameraRig zoomPose={zoomed} reducedMotion={reducedMotion} />

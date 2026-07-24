@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { playSfx } from '../audio/useSfx';
+import { playSfx, setTickLoop, useSfx } from '../audio/useSfx';
 import { haptic } from './haptics';
 import type { MissionRunner } from './useMissionRunner';
 
@@ -8,7 +8,17 @@ import type { MissionRunner } from './useMissionRunner';
  * classic and Field Case shells so audio behavior stays identical.
  */
 export function useMissionSfx(runner: MissionRunner): void {
+  const { ticking } = useSfx();
   const prevStrikes = useRef(runner.moduleStrikes);
+
+  // Ambient clockwork: ticks through the whole mission (toggleable in
+  // Settings), accelerating when a real timer runs low.
+  const timerLow = runner.timed && runner.secondsLeft <= 30 && runner.secondsLeft > 0;
+  useEffect(() => {
+    setTickLoop(!runner.finished && ticking, timerLow);
+    return () => setTickLoop(false);
+  }, [runner.finished, timerLow, ticking]);
+
   const prevSolved = useRef(runner.solvedCount);
   const prevFailed = useRef(runner.results.filter((r) => r.failed).length);
 

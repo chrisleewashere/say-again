@@ -13,11 +13,21 @@ import {
   CASE_ALUMINUM,
   CASE_ALUMINUM_WORN,
   CASE_INTERIOR,
+  FACEPLATE_PHENOLIC,
+  LAMP_AMBER,
+  LAMP_GREEN,
   LAMP_OFF,
   LAMP_RED,
   SCREW_BRASS,
   SCREW_STEEL,
 } from './materials';
+
+const BOARD_LAMP: Record<'locked' | 'active' | 'solved' | 'failed', THREE.Material> = {
+  locked: LAMP_OFF,
+  active: LAMP_AMBER,
+  solved: LAMP_GREEN,
+  failed: LAMP_RED,
+};
 import { CASE_D, CASE_H, CASE_W, LID_H, LID_OPEN_ANGLE } from './layout';
 
 function Latch({ x }: { x: number }) {
@@ -39,6 +49,8 @@ function CornerScrew({ x, z, brass = false }: { x: number; z: number; brass?: bo
   );
 }
 
+type BoardState = 'locked' | 'active' | 'solved' | 'failed';
+
 interface FieldCaseProps {
   /** 0 = closed, 1 = fully open; the shell animates this for the ritual */
   openAmount: number;
@@ -50,13 +62,15 @@ interface FieldCaseProps {
   strikes: number;
   maxStrikes: number;
   alarmFlash: boolean;
+  /** per-module states for the lid status board lamps */
+  moduleStates?: BoardState[];
   /** faceplates racked in the base (world-space slots) */
   baseChildren?: React.ReactNode;
-  /** faceplates racked in the lid — parented to the hinge so they inherit its motion */
+  /** extra lid-mounted content (parented to the hinge) */
   lidChildren?: React.ReactNode;
 }
 
-export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmFlash, baseChildren, lidChildren }: FieldCaseProps) {
+export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmFlash, moduleStates, baseChildren, lidChildren }: FieldCaseProps) {
   const lidRef = useRef<THREE.Group>(null);
   const flashRef = useRef<THREE.PointLight>(null);
 
@@ -123,13 +137,7 @@ export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmF
       </group>
       <pointLight ref={flashRef} position={[0, CASE_H + 0.4, CASE_D / 2 + 0.5]} color="#ff5a5a" intensity={0} distance={4} />
 
-      {/* phosphor countdown tube inset on the front edge */}
-      <group position={[1.35, CASE_H - 0.14, CASE_D / 2 + 0.012]}>
-        <RoundedBox args={[0.72, 0.22, 0.03]} radius={0.02} material={CASE_ALUMINUM_WORN} />
-        <Html transform occlude position={[0, 0, 0.018]} scale={0.07} wrapperClass="faceplate-wrap" zIndexRange={[10, 0]}>
-          <div className="case-phosphor" aria-hidden="true">{clock ?? 'READY'}</div>
-        </Html>
-      </group>
+      {/* the phosphor clock now lives on the lid status board */}
 
       {/* rear serial plate — only readable by turning the case (spatial-language bait) */}
       <group position={[0.9, CASE_H / 2, -CASE_D / 2 - 0.012]} rotation={[0, Math.PI, 0]}>
@@ -141,7 +149,7 @@ export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmF
 
       {baseChildren}
 
-      {/* ---- lid (hinged at the back edge) ---- */}
+      {/* ---- lid (hinged at the back edge): the MISSION STATUS BOARD ---- */}
       <group position={[0, CASE_H, -CASE_D / 2]}>
         <group ref={lidRef}>
           {lidChildren}
@@ -151,8 +159,53 @@ export function FieldCase({ openAmount, code, clock, strikes, maxStrikes, alarmF
             <mesh position={[0, -LID_H / 2 - 0.006, 0]} rotation={[Math.PI / 2, 0, 0]} material={CASE_INTERIOR}>
               <planeGeometry args={[CASE_W - 0.36, CASE_D - 0.36]} />
             </mesh>
-            {/* brass mission plate riveted inside the lid, low edge */}
-            <group position={[0, -LID_H / 2 - 0.03, 0.1]}>
+
+            {/* board frame: recessed panel the instruments mount into */}
+            <RoundedBox
+              args={[3.6, 0.02, 2.1]}
+              radius={0.02}
+              position={[0, -LID_H / 2 - 0.014, 0.05]}
+              material={FACEPLATE_PHENOLIC}
+            />
+
+            {/* phosphor mission clock — top of the board, reads across the room */}
+            <group position={[0, -LID_H / 2 - 0.035, 0.6]}>
+              <RoundedBox args={[1.5, 0.03, 0.4]} radius={0.02} material={CASE_ALUMINUM_WORN} />
+              <Html
+                transform
+                occlude
+                position={[0, -0.022, 0]}
+                rotation={[Math.PI / 2, 0, 0]}
+                scale={0.1}
+                wrapperClass="faceplate-wrap"
+                zIndexRange={[10, 0]}
+              >
+                <div className="case-phosphor" aria-hidden="true">{clock ?? 'READY'}</div>
+              </Html>
+            </group>
+
+            {/* per-module status lamps: one jewel per racked module */}
+            {moduleStates && moduleStates.length > 0 && (
+              <group position={[0, -LID_H / 2 - 0.035, 0.05]}>
+                <RoundedBox
+                  args={[0.34 * moduleStates.length + 0.2, 0.03, 0.34]}
+                  radius={0.02}
+                  material={CASE_ALUMINUM_WORN}
+                />
+                {moduleStates.map((state, i) => (
+                  <mesh
+                    key={i}
+                    position={[(i - (moduleStates.length - 1) / 2) * 0.34, -0.035, 0]}
+                    material={BOARD_LAMP[state]}
+                  >
+                    <sphereGeometry args={[0.07, 16, 12]} />
+                  </mesh>
+                ))}
+              </group>
+            )}
+
+            {/* brass mission plate riveted below the lamps */}
+            <group position={[0, -LID_H / 2 - 0.03, -0.5]}>
               <RoundedBox args={[1.5, 0.03, 0.42]} radius={0.01} material={BRASS} />
               <Html
                 transform

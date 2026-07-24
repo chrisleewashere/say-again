@@ -200,18 +200,18 @@ describe('audio prefs persistence', () => {
 
   it('returns defaults when storage is unavailable', () => {
     expect(loadAudioPrefs(null)).toEqual(DEFAULT_AUDIO_PREFS);
-    expect(() => saveAudioPrefs({ volume: 0.5, muted: true }, null)).not.toThrow();
+    expect(() => saveAudioPrefs({ volume: 0.5, muted: true, ticking: true }, null)).not.toThrow();
   });
 
   it('round-trips save → load under the ky-audio key', () => {
     const storage = mockStorage();
-    saveAudioPrefs({ volume: 0.35, muted: true }, storage);
+    saveAudioPrefs({ volume: 0.35, muted: true, ticking: true }, storage);
     expect(Object.keys(storage.data)).toEqual([AUDIO_STORAGE_KEY]);
-    expect(loadAudioPrefs(storage)).toEqual({ volume: 0.35, muted: true });
+    expect(loadAudioPrefs(storage)).toEqual({ volume: 0.35, muted: true, ticking: true });
   });
 
   it('clamps out-of-range persisted volume on load', () => {
-    const over = mockStorage({ [AUDIO_STORAGE_KEY]: JSON.stringify({ volume: 4, muted: false }) });
+    const over = mockStorage({ [AUDIO_STORAGE_KEY]: JSON.stringify({ volume: 4, muted: false, ticking: true }) });
     expect(loadAudioPrefs(over).volume).toBe(1);
     const under = mockStorage({ [AUDIO_STORAGE_KEY]: JSON.stringify({ volume: -2, muted: false }) });
     expect(loadAudioPrefs(under).volume).toBe(0);
@@ -227,7 +227,7 @@ describe('audio prefs persistence', () => {
 
   it('preserves known fields when the other is missing', () => {
     const storage = mockStorage({ [AUDIO_STORAGE_KEY]: JSON.stringify({ muted: true }) });
-    expect(loadAudioPrefs(storage)).toEqual({ volume: DEFAULT_AUDIO_PREFS.volume, muted: true });
+    expect(loadAudioPrefs(storage)).toEqual({ volume: DEFAULT_AUDIO_PREFS.volume, muted: true, ticking: true });
   });
 });
 
