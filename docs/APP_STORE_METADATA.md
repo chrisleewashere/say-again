@@ -51,7 +51,7 @@ Answer "No" to all questionnaire items → **4+**.
 
 ## Support URL
 
-`https://github.com/chrisleewashere/keep-yapping-and-everyone-escapes`
+`https://github.com/chrisleewashere/say-again`
 
 ## Privacy Policy URL
 

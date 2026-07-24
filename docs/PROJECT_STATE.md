@@ -1,7 +1,7 @@
 # Project State — Say Again?
 
 > Living onboarding digest for anyone (human or Claude session) picking up this repo.
-> Last updated: 2026-07-24.
+> Last updated: 2026-07-24 (post-rename).
 
 ## What this is
 
@@ -101,13 +101,17 @@ deferred until actual launch, per Chris.
 
 ## Distribution
 
-- Playable web build (private artifact, stable URL):
-  https://claude.ai/code/artifact/457f11ec-6c9f-4cce-a841-7782faf39c2b
-  Pipeline: `npx vite build --config vite.artifact.config.ts` → extract fragment
-  (title + styles + root div + module scripts) → republish same URL.
-- PWA works offline; Chromebook path = publish to a public URL (not yet done).
-- Repo rename to `say-again` endorsed but not done (GitHub disallows `?` in names;
-  redirects preserve old links; afterwards sweep support/privacy URLs in docs).
+- PRIMARY: GitHub Pages — https://chrisleewashere.github.io/say-again/ — deployed
+  by .github/workflows/pages.yml on every push to main (tests gate the build;
+  base path derives from the repo name). Public, works on iPads + Chromebooks.
+- Legacy private artifact (one cosmetic build behind, updates currently BLOCKED
+  by a service-side "PR review page" classifier misfiring on the bundle —
+  bisected to a ~190KB slice of minified app code; size/canonicalRoute/github
+  URLs each ruled out): https://claude.ai/code/artifact/457f11ec-6c9f-4cce-a841-7782faf39c2b
+- RENAMES DONE 2026-07-24: repo is now chrisleewashere/say-again; default branch
+  is `main` (was claude/keep-talking-speech-therapy-uwr442). Old URLs redirect.
+  Develop on and push to `main` now — per Chris, superseding earlier branch
+  instructions. Repo stays PUBLIC (free Pages; private+Pages is paywalled).
 
 ## Visual identity (decided 2026-07-24)
 

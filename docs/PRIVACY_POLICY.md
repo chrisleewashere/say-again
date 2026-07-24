@@ -38,4 +38,4 @@ consistent with COPPA and FERPA expectations.
 ## Contact
 
 Questions about this policy: open an issue at
-https://github.com/chrisleewashere/keep-yapping-and-everyone-escapes
+https://github.com/chrisleewashere/say-again

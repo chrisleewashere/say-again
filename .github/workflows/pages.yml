@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - claude/keep-talking-speech-therapy-uwr442
   workflow_dispatch:
 
 permissions:
