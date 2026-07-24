@@ -40,20 +40,32 @@ function QualityFrameBridge({ recordFrame }: { recordFrame: (t: number) => void 
   return null;
 }
 
-/** Procedural neutral studio environment — zero network fetches. */
+/**
+ * Procedural neutral studio environment — zero network fetches. The
+ * environment light WARMS UP (eases from black to the theme level) instead
+ * of popping on when the bake lands: the desk lamp finds the case first,
+ * then the room fades in around it.
+ */
 function StudioEnvironment({ intensity }: { intensity: number }) {
   const { gl, scene } = useThree();
+  const warm = useRef({ start: 0 });
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
     const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = env;
-    scene.environmentIntensity = intensity;
+    scene.environmentIntensity = 0;
+    warm.current.start = performance.now() + 400;
     return () => {
       scene.environment = null;
       env.dispose();
       pmrem.dispose();
     };
-  }, [gl, scene, intensity]);
+  }, [gl, scene]);
+  useFrame(() => {
+    if (!scene.environment) return;
+    const p = Math.min(1, Math.max(0, (performance.now() - warm.current.start) / 1600));
+    scene.environmentIntensity = intensity * p * p;
+  });
   return null;
 }
 
