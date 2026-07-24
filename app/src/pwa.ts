@@ -29,7 +29,7 @@ export function registerServiceWorker(options: RegisterOptions = {}): boolean {
 
   const register = () => {
     nav.serviceWorker
-      .register('/sw.js')
+      .register(`${import.meta.env.BASE_URL}sw.js`)
       .then((registration) => {
         console.log('[pwa] service worker registered, scope:', registration.scope);
       })
