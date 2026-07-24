@@ -1,7 +1,7 @@
 # Project State — Say Again?
 
 > Living onboarding digest for anyone (human or Claude session) picking up this repo.
-> Last updated: 2026-07-13.
+> Last updated: 2026-07-24.
 
 ## What this is
 
@@ -108,6 +108,15 @@ deferred until actual launch, per Chris.
 - PWA works offline; Chromebook path = publish to a public URL (not yet done).
 - Repo rename to `say-again` endorsed but not done (GitHub disallows `?` in names;
   redirects preserve old links; afterwards sweep support/privacy URLs in docs).
+
+## Visual identity (decided 2026-07-24)
+
+Chris chose **Tradecraft** (refined 1968 analog spycraft) from a 4-way agent
+competition (vs blackline/atomic/noir — files kept in `src/scene/themes/` for a
+possible future "case finish" setting; do not delete). All six plates rack in
+the case BOTTOM (2x3); the lid is the mission status board (phosphor clock,
+module jewels, brass plate). Mission ticking is default-on (Settings toggle).
+Theme = data (`SceneTheme`); active theme persists under `ky-scene-theme`.
 
 ## Open threads
 

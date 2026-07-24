@@ -158,6 +158,11 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
       <mesh position={[screwOff - 0.09, screwOff - 0.09, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
+      {/* the lit module glows: a soft amber pool so the active plate reads
+          across the room, not just by its corner jewel */}
+      {state === 'active' && (
+        <pointLight position={[0, 0, 0.55]} color="#ffb347" intensity={0.55} distance={1.6} decay={2} />
+      )}
 
       {/* lockdown bars bolt across a failed module */}
       {state === 'failed' &&

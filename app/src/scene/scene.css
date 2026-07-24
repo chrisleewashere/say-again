@@ -129,14 +129,14 @@
   font-family: var(--font-mono);
   font-size: 26px;
   letter-spacing: 0.3em;
-  color: #6d6250;
+  color: #a89878;
 }
 
 .faceplate-diff {
   font-family: var(--font-mono);
   font-size: 18px;
   letter-spacing: 0.25em;
-  color: #4f4739;
+  color: #7d6f55;
 }
 
 .faceplate-cta {
@@ -162,7 +162,7 @@
   font-family: var(--font-mono);
   font-size: 20px;
   letter-spacing: 0.35em;
-  color: #8a7a5c;
+  color: #b3a17c;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
   padding-top: 6px;
 }
@@ -311,7 +311,9 @@
 }
 
 .case-etched-dark {
-  color: #5c4a2e;
+  color: #2e2415;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 240, 210, 0.55);
 }
 
 /* the rear plate's parent group carries a half-turn; counter-mirror the text */
