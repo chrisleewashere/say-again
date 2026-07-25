@@ -154,8 +154,13 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
           <cylinderGeometry args={[0.026, 0.026, 0.015, 10]} />
         </mesh>
       ))}
-      {/* corner jewel lamp: amber = live, green = passed, red = failed, dark = sealed */}
-      <mesh position={[screwOff - 0.09, screwOff - 0.09, 0.01]} material={LAMP[state]}>
+      {/* Status jewel: amber = live, green = passed, red = failed, dark = sealed.
+          Lives on the BEZEL MARGIN, centred between the two top screws — the same
+          ring the screws sit on. It used to be inset by 0.09 from the corner screw,
+          which put it on top of the face content and collided with the title the
+          face texture draws there. The bezel has no content, so it can never
+          overlap at any face size. */}
+      <mesh position={[0, screwOff, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
       {/* the lit module glows: a soft amber pool so the active plate reads
