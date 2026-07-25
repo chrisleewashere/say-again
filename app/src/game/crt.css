@@ -1,0 +1,1424 @@
+/* ==================================================================
+   FIELD INSTRUMENT — the menus, drawn as the field case's control face
+   ------------------------------------------------------------------
+   SCOPE: every selector in this file starts with `.crt`, which is only
+   ever put on the five menu <main> elements (Home, MissionSetup, HowTo,
+   Settings, Logbook). Nothing here touches the bare `button {}` rule,
+   the shared `.card` / `.btn-primary` / `.sr-only` / `:focus-visible`
+   rules in index.css, or any :root token — so src/scene/** and
+   src/modules/** are untouched. All overrides are written at a higher
+   specificity than the rule they replace, so CSS bundle order is not
+   load-bearing WITHIN this file's relationship to index.css. Note that
+   the a11y blocks at the bottom re-declare tokens on the SAME selector
+   (`.crt`) they are overriding, and a media query adds no specificity —
+   so the `prefers-reduced-motion` block is deliberately written as
+   `html .crt` to win on specificity rather than on source order. Keep it
+   that way: if it ever gets split into a separate file, order-dependence
+   would silently disable reduced-motion.
+
+   The bare `button {}` rule in index.css is the ONLY thing enforcing the
+   48px (--touch) floor across menus, modules and scene chrome. Nothing
+   here replaces it; the padding below only ever adds to it.
+
+   CONTINUITY: the palette is lifted off the Tradecraft 3D theme
+   (src/scene/themes/tradecraft.ts) so the menu reads as the same object
+   the player is about to open — brass fittings #cca267, engraved etch
+   #8a7048, phenolic plate, lamp amber #ffb347, and one hot key light
+   coming from the upper right (key at [3.5, 6, 4]).
+
+   CONTRAST (measured against --fi-panel #16130e, WCAG relative
+   luminance). `.fi-frame::after` paints the scanline band ABOVE the
+   in-flow content (z-index 1), so 1 row in every 3 is composited through
+   rgba(0,0,0,0.17) — text AND ground alike. Both columns are real; cost
+   any future effect change from the BANDED column, which is the true
+   worst case on screen:
+                            plain   banded
+     --fi-ink   #ffd9a8    13.9:1   9.7:1   prose
+     --fi-hot   #ffb347    10.4:1   7.4:1   readouts, titles, filled bars
+     --fi-dim   #d9a253     8.2:1   5.9:1   captions, secondary
+     --fi-brass #cca267     7.9:1   5.7:1   legends, chassis edge
+     --fi-line  #92764c     4.3:1   3.3:1   every engraved boundary
+     ink on amber #14100a on #ffb347
+                           10.6:1   7.5:1
+   Every text pair clears 4.5:1 banded; --fi-line clears the 3:1 UI
+   boundary floor banded on all four grounds (3.3:1 panel, 3.4:1
+   faceplate, 3.5:1 well, and 3.2:1 at its single worst point — see the
+   rake note below). The banded figures are ~30% tighter than the plain
+   ones; that is the headroom an effect bump actually spends.
+   --fi-line-soft is DECORATIVE ONLY (2.2:1 plain) — graduation ticks and
+   the disabled hatch. It never draws a control boundary or carries
+   meaning.
+
+   EFFECT KILL-SWITCHES: every effect this file introduces is a custom
+   property (--fi-scan, --fi-glow, --fi-glow-soft, --fi-led-glow,
+   --fi-rake) and every consumer reads the property, so the a11y blocks
+   at the bottom switch them off by re-declaring the token — no
+   `!important` and no universal selectors required. Same for the
+   all-caps (--fi-caps), the wide tracking (--fi-track*), the prose
+   line-height (--fi-lh) and the stroke weight (--fi-stroke).
+   ================================================================== */
+
+.crt {
+  /* surfaces */
+  --fi-void: #07090c;      /* the dark room the case sits in */
+  --fi-face: #100e0b;      /* faceplate */
+  --fi-panel: #16130e;     /* recessed panel */
+  --fi-well: #0b0907;      /* input wells, readout backing */
+
+  /* strokes */
+  /* Engraved hairline. Tradecraft etchColor is #8a7048; this is lifted
+     one notch off it because #8a7048 measured 2.93:1 in the rake's hot
+     corner under a scanline band — a hair under the 3:1 UI-boundary
+     floor. #92764c puts that same worst case at 3.18:1. */
+  --fi-line: #92764c;
+  --fi-line-soft: #5a4a30; /* decorative graduations only */
+  --fi-brass: #cca267;     /* chassis fittings (tradecraft accentMetal) */
+  --fi-stroke: 1px;        /* doubled under high contrast */
+
+  /* ink */
+  --fi-ink: #ffd9a8;
+  --fi-dim: #d9a253;
+  --fi-hot: #ffb347;       /* lamp amber — matches lampAmber in the 3D theme */
+  --fi-ink-on-hot: #14100a;
+  --fi-led: #4cc38a;       /* the one green status jewel */
+
+  /* effects */
+  --fi-scan: 1;
+  --fi-glow: 0 0 7px rgba(255, 179, 71, 0.28);
+  --fi-glow-soft: 0 0 5px rgba(204, 162, 103, 0.2);
+  --fi-led-glow: 0 0 7px rgba(76, 195, 138, 0.55);
+  /* Key-light rake from the upper right. This is the worst place on the
+     face for a hairline: the rake lifts the faceplate to rgb(28,24,18)
+     at peak, and a scanline band then darkens stroke and ground alike.
+     MEASURED at peak 0.05, --fi-line #92764c against that lit faceplate:
+     4.14:1 unbanded, 3.18:1 banded. That banded number is the binding
+     constraint in this whole file — it is the only value that sits
+     within 0.2 of a WCAG floor. Raising the rake peak, raising the
+     scanline alpha, or darkening --fi-line all spend it directly; at
+     peak 0.07 with the old #8a7048 it measured 2.85:1 and failed.
+     Re-measure, do not eyeball, before changing any of those three. */
+  --fi-rake: linear-gradient(
+    215deg,
+    rgba(255, 214, 150, 0.05) 0%,
+    rgba(255, 214, 150, 0.022) 30%,
+    rgba(255, 214, 150, 0) 58%
+  );
+
+  /* type + rhythm */
+  --fi-font: var(--font-mono);
+  --fi-caps: uppercase;
+  --fi-track: 0.18em;       /* wide-tracked chrome: legends, captions */
+  --fi-track-sm: 0.14em;    /* keys, tags, table heads */
+  --fi-track-tight: 0.1em;  /* titles and readout values */
+  --fi-lh: 1.65;            /* long-form prose */
+  --fi-pad: clamp(14px, 2vw, 22px);
+  --fi-gap: clamp(12px, 1.6vw, 18px);
+}
+
+/* ---------- chassis ------------------------------------------------ */
+
+.screen.crt {
+  max-width: none;
+  width: 100%;
+  padding: 0;
+  gap: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--fi-void);
+  color: var(--fi-ink);
+  font-family: var(--fi-font);
+}
+
+.crt .fi-frame {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-gap);
+  padding: calc(var(--fi-pad) + 10px);
+  background-color: var(--fi-face);
+  background-image: var(--fi-rake);
+  background-repeat: no-repeat;
+  border-left: var(--fi-stroke) solid var(--fi-brass);
+  border-right: var(--fi-stroke) solid var(--fi-brass);
+}
+
+/* inner vector border + four brass corner brackets */
+.crt .fi-frame::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  pointer-events: none;
+  border: var(--fi-stroke) solid var(--fi-line);
+  background-origin: border-box;
+  background-clip: border-box;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass));
+  background-size:
+    26px 2px, 2px 26px,
+    26px 2px, 2px 26px,
+    26px 2px, 2px 26px,
+    26px 2px, 2px 26px;
+  background-position:
+    left top, left top,
+    right top, right top,
+    left bottom, left bottom,
+    right bottom, right bottom;
+}
+
+/* faint horizontal banding across the whole face */
+.crt .fi-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--fi-scan);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0 2px,
+    rgba(0, 0, 0, 0.17) 2px 3px
+  );
+}
+
+/* ---------- engraved legends & captions ---------------------------- */
+
+.crt .fi-cap,
+.crt .fi-readout-cap,
+.crt .home-replay > label,
+.crt .setup-students-row label {
+  font-family: var(--fi-font);
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: var(--fi-track);
+  text-transform: var(--fi-caps);
+  color: var(--fi-dim);
+  margin: 0;
+}
+
+.crt .fi-cap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.crt .card > h2 + .fi-cap {
+  margin-top: 0;
+}
+
+.crt .fi-cap::after {
+  content: '';
+  flex: 1 1 auto;
+  border-top: var(--fi-stroke) solid var(--fi-line);
+}
+
+/* ---------- panels: the label sits ON the top border --------------- */
+
+.crt .card,
+.crt .fi-panel {
+  position: relative;
+  background: var(--fi-panel);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: calc(var(--fi-pad) + 0.5em) var(--fi-pad) var(--fi-pad);
+}
+
+/* bracket corners on every panel */
+.crt .card::before,
+.crt .fi-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass)),
+    linear-gradient(var(--fi-brass), var(--fi-brass));
+  background-size: 14px 1px, 1px 14px, 14px 1px, 1px 14px;
+  background-position: left top, left top, right bottom, right bottom;
+}
+
+.crt .card > h2,
+.crt .fi-panel > h2 {
+  position: absolute;
+  top: 0;
+  left: 16px;
+  transform: translateY(-52%);
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 0 10px;
+  background: var(--fi-panel);
+  font-family: var(--fi-font);
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: var(--fi-track);
+  text-transform: var(--fi-caps);
+  color: var(--fi-brass);
+  text-shadow: var(--fi-glow-soft);
+}
+
+/* ---------- type ---------------------------------------------------- */
+
+.crt .home-title {
+  margin: 0;
+  font-family: var(--fi-font);
+  font-size: 2.4em;
+  line-height: 1.1;
+  letter-spacing: var(--fi-track-tight);
+  text-transform: var(--fi-caps);
+  color: var(--fi-hot);
+  text-shadow: var(--fi-glow);
+}
+
+.crt .screen-header {
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: var(--fi-stroke) solid var(--fi-line);
+}
+
+.crt .screen-header h1 {
+  font-family: var(--fi-font);
+  font-size: 1.15em;
+  letter-spacing: var(--fi-track);
+  text-transform: var(--fi-caps);
+  color: var(--fi-hot);
+  text-shadow: var(--fi-glow);
+}
+
+/* Long-form reading stays on the readable body stack: engraved legends
+   are monospace, briefing copy is not. These are teenagers with language
+   needs reading full paragraphs — the idiom does not get to cost that. */
+.crt .home-sub,
+.crt .fi-prose,
+.crt .setup-note,
+.crt .fi-steps li,
+.crt .module-card-info p,
+.crt .fi-hint,
+.crt .setup-empty,
+.crt .logbook-empty {
+  font-family: var(--font-body);
+  line-height: var(--fi-lh);
+}
+
+.crt .home-sub,
+.crt .fi-prose {
+  color: var(--fi-ink);
+  max-width: 64ch;
+  margin: 0;
+}
+
+.crt .setup-note,
+.crt .setup-empty,
+.crt .logbook-empty,
+.crt .fi-hint {
+  color: var(--fi-dim);
+  margin: 0;
+}
+
+.crt .fi-hint {
+  font-size: 0.86em;
+  margin-top: 10px;
+  max-width: 52ch;
+}
+
+/* graduated scale rule */
+.crt .fi-scale {
+  height: 13px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-image:
+    repeating-linear-gradient(to right, var(--fi-line-soft) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(to right, var(--fi-line) 0 1px, transparent 1px 60px),
+    linear-gradient(var(--fi-line), var(--fi-line));
+  background-size: 100% 6px, 100% 11px, 100% 1px;
+  background-position: left bottom, left bottom, left bottom;
+}
+
+/* wide emphasised banner boxed across the layout */
+.crt .fi-banner {
+  margin: 0;
+  padding: 9px 12px;
+  text-align: center;
+  font-family: var(--fi-font);
+  font-size: 0.8em;
+  letter-spacing: var(--fi-track);
+  text-transform: var(--fi-caps);
+  color: var(--fi-hot);
+  border-top: var(--fi-stroke) solid var(--fi-line);
+  border-bottom: var(--fi-stroke) solid var(--fi-line);
+  text-shadow: var(--fi-glow);
+}
+
+/* When the banner sits directly under the screen header, its top border
+   and the header's bottom border land a gap apart and read as a doubled
+   parallel hairline under the title. One rule, not two. */
+.crt .screen-header + .fi-banner {
+  border-top: none;
+}
+
+/* ---------- keys ---------------------------------------------------- */
+
+.crt button {
+  font-family: var(--fi-font);
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  color: var(--fi-ink);
+  padding: 10px 16px;
+}
+
+.crt button:hover:not(:disabled) {
+  border-color: var(--fi-brass);
+  color: var(--fi-hot);
+}
+
+.crt button:disabled {
+  /* Not dimmed into unreadability: index.css drops disabled buttons to
+     45% opacity, which puts amber on the faceplate at ~3:1. An unarmed
+     key on a real instrument is unlit, not faint — so it reads as
+     hatched and dashed, which survives greyscale and keeps 8:1 text.
+     Honest accounting of what carries "unarmed" here, strongest first:
+     (1) the WORDS — `.fi-statusbar` "Standby — no mission loaded" on
+     Home, `.fi-launch-note` "Case empty — load at least one module" on
+     Setup; (2) the dashed border; (3) the hatch. The hatch is texture,
+     not a contrast channel: even at 0.5 alpha it is only 1.40:1 against
+     the key fill, so it is a glance-level cue and nothing is allowed to
+     depend on it alone. 0.5 is the ceiling — at higher alpha the --fi-dim
+     label on the hatch lines drops under 4.5:1 once the scanline band
+     composites over it (4.81:1 at 0.5). High contrast redraws this in
+     white below, where it does reach 2.46:1. */
+  opacity: 1;
+  cursor: not-allowed;
+  color: var(--fi-dim);
+  border-style: dashed;
+  border-color: var(--fi-line);
+  background-color: var(--fi-well);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(90, 74, 48, 0) 0 6px,
+    rgba(90, 74, 48, 0.5) 6px 7px
+  );
+}
+
+.crt .btn-primary {
+  background: var(--fi-hot);
+  background-image: none;
+  border: var(--fi-stroke) solid var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  font-weight: 700;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  text-shadow: none;
+}
+
+.crt .btn-primary:hover:not(:disabled) {
+  color: var(--fi-ink-on-hot);
+  border-color: var(--fi-brass);
+}
+
+.crt .btn-primary:disabled {
+  background-color: var(--fi-well);
+  color: var(--fi-dim);
+  border-color: var(--fi-line);
+}
+
+.crt .home-big-btn {
+  font-size: 1.1em;
+  padding: 15px 30px;
+}
+
+.crt .fi-run {
+  width: 100%;
+}
+
+/* segmented state keys */
+.crt .chip {
+  border-radius: 0;
+  padding: 10px 15px;
+  font-size: 0.9em;
+  font-family: var(--fi-font);
+  letter-spacing: 0.06em;
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  color: var(--fi-ink);
+}
+
+/* The empty/filled status square — state is never colour alone (it is
+   also carried by aria-pressed and by the fill). Empty `content` so the
+   square adds nothing to the accessible name: the e2e contract queries
+   /3 wrong/i and /Static: 2/ against the visible chip text. */
+.crt .chip::before {
+  content: '';
+  display: inline-block;
+  width: 0.72em;
+  height: 0.72em;
+  margin-right: 0.6em;
+  border: var(--fi-stroke) solid currentColor;
+  vertical-align: baseline;
+}
+
+.crt .chip-on {
+  background: var(--fi-hot);
+  border-color: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  font-weight: 700;
+}
+
+.crt .chip-on::before {
+  background: currentColor;
+}
+
+/* A filled key must not pick up the outline-key hover ink — `.crt
+   button:hover:not(:disabled)` outweighs `.crt .chip-on`, which would
+   leave amber text on an amber fill. Not theoretical: :hover sticks
+   after a tap on iPadOS, so the selected filter would go blank. */
+.crt .chip-on:hover:not(:disabled) {
+  color: var(--fi-ink-on-hot);
+  border-color: var(--fi-brass);
+}
+
+.crt .filter-row {
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* ---------- wells (text entry) -------------------------------------- */
+
+.crt .home-replay input,
+.crt .setup-students-row input {
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  color: var(--fi-hot);
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  padding: 10px 12px;
+}
+
+.crt .home-replay input::placeholder,
+.crt .setup-students-row input::placeholder {
+  color: var(--fi-dim);
+  opacity: 1;
+  letter-spacing: 0.08em;
+}
+
+/* index.css scopes :focus-visible to button/a/[tabindex], so every input
+   here — including the volume range — needs its own indicator. */
+.crt input:focus-visible {
+  outline: 3px solid var(--fi-hot);
+  outline-offset: 2px;
+}
+
+.crt .home-replay {
+  color: var(--fi-dim);
+  font-size: 1em;
+  gap: 8px;
+}
+
+/* wide enough for AAA-000 at the tracked-out letter spacing, and for the
+   placeholder that teaches the format */
+.crt .home-replay input {
+  width: 16ch;
+}
+
+/* The chrome treatment makes these captions wider than the fields they
+   sit over. MEASURED: the label box is 0.78em, so 1ch on the well is 8px;
+   "FIELD AGENT" renders 114px at 0.18em tracking, against a 12ch well of
+   96px (border-box). At game.css's 18px gap the second caption ends up
+   nearer the gap than its own field and the pair reads as one run —
+   "FIELD AGENT  HANDLER" over two boxes. Association is programmatically
+   correct (implicit <label> wrap), so this is not a WCAG failure, but
+   role separation is the entire premise of the game and it must not be
+   ambiguous at a glance on a shared iPad.
+   16ch = 128px clears the 114px caption with room to spare, and since ch
+   and the caption both scale off the same font-size the clearance holds
+   under large-text and easier-reading. It also gives MORE typing room
+   than the 12ch original (102px of content box vs 70px). The 32px gap is
+   then wider than the leftover slack inside a well, so each caption is
+   unambiguously nearer its own field.
+   game.css is deliberately left alone; both overrides are scoped to .crt. */
+.crt .setup-students-row {
+  gap: 32px;
+}
+
+.crt .setup-students-row input {
+  width: 16ch;
+}
+
+.crt .setup-students-row label {
+  gap: 8px;
+}
+
+/* ---------- readout rail -------------------------------------------- */
+
+.crt .fi-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.crt .fi-readout {
+  display: flex;
+  flex-direction: column;
+  border: var(--fi-stroke) solid var(--fi-line);
+  background: var(--fi-well);
+  min-width: 0;
+}
+
+/* inverted caption strip above a big value */
+.crt .fi-readout-cap {
+  background: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  padding: 4px 9px;
+  font-size: 0.72em;
+}
+
+.crt .fi-readout-val {
+  font-family: var(--fi-font);
+  font-size: 1.8em;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: var(--fi-track-tight);
+  color: var(--fi-hot);
+  padding: 8px 10px;
+  text-shadow: var(--fi-glow);
+  overflow-wrap: anywhere;
+}
+
+/* readouts docked into a screen header stay compact */
+.crt .screen-header .fi-readout {
+  flex: none;
+}
+
+.crt .screen-header .fi-readout-val {
+  font-size: 1.3em;
+}
+
+/* the mission code sits in a readout in the setup header: the caption
+   strip supplies the frame, so the code itself drops its own box */
+.crt .fi-readout-code .mission-code {
+  border: 0;
+  background: transparent;
+  font-size: 1.25em;
+  font-weight: 700;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+/* checkbox status column */
+.crt .fi-checks {
+  border: var(--fi-stroke) solid var(--fi-line);
+  padding: 10px;
+}
+
+.crt .fi-checks-cap {
+  margin: -10px -10px 0;
+}
+
+.crt .fi-checks ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.crt .fi-checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.86em;
+  line-height: 1.4;
+  color: var(--fi-ink);
+}
+
+.crt .fi-box {
+  flex: none;
+  width: 0.8em;
+  height: 0.8em;
+  margin-top: 0.3em;
+  border: var(--fi-stroke) solid var(--fi-line);
+}
+
+.crt .fi-led {
+  flex: none;
+  width: 0.7em;
+  height: 0.7em;
+  margin-top: 0.35em;
+  border-radius: 50%;
+  background: var(--fi-led);
+  box-shadow: var(--fi-led-glow);
+}
+
+/* The panel's one green jewel: a lit status lamp, ruled off from the
+   checkbox rows above it so the round green glyph and the square amber
+   one are not read as two states of the same thing. Its meaning is
+   carried by the legend word, never by the colour. */
+.crt .fi-lamp {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 11px 0 0;
+  padding-top: 10px;
+  border-top: var(--fi-stroke) solid var(--fi-line);
+  font-size: 0.86em;
+  line-height: 1.4;
+  color: var(--fi-ink);
+}
+
+.crt .fi-lamp-k {
+  font-family: var(--fi-font);
+  font-weight: 700;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  color: var(--fi-dim);
+}
+
+/* ---------- home layout --------------------------------------------- */
+
+.crt .fi-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fi-gap);
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: var(--fi-stroke) solid var(--fi-line);
+}
+
+.crt .fi-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crt .fi-mark-lines {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fi-font);
+  letter-spacing: var(--fi-track);
+  text-transform: var(--fi-caps);
+}
+
+.crt .fi-mark-l1 {
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--fi-brass);
+}
+
+.crt .fi-mark-l2 {
+  font-size: 0.68em;
+  color: var(--fi-dim);
+}
+
+.crt .fi-topbar-keys {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.crt .fi-titleblock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.crt .fi-console {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 260px);
+  gap: var(--fi-gap);
+  align-items: start;
+}
+
+.crt .fi-console-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fi-gap);
+  min-width: 0;
+}
+
+.crt .fi-runrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Inverted status row — the reference's solid amber "STATUS: AUTO MODE"
+   bar. Sits at the foot of the left column, which also takes some of the
+   slack the right-hand rail leaves under it on tall desktop windows.
+   #14100a on #ffb347 is 10.6:1; under high contrast it is #000 on
+   #ffb347, 11.8:1. */
+.crt .fi-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 12px;
+  margin: 0;
+  padding: 9px 12px;
+  background: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  font-family: var(--fi-font);
+  font-size: 0.78em;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+}
+
+.crt .fi-statusbar-k {
+  font-weight: 700;
+}
+
+.crt .fi-statusbar-k::after {
+  content: ':';
+}
+
+/* engraved strip pinned to the bottom edge of the faceplate */
+.crt .fi-footer {
+  margin: auto 0 0;
+  padding-top: 14px;
+  font-family: var(--fi-font);
+  font-size: 0.76em;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  color: var(--fi-dim);
+  background-repeat: no-repeat;
+  background-image:
+    repeating-linear-gradient(to right, var(--fi-line-soft) 0 1px, transparent 1px 12px),
+    linear-gradient(var(--fi-line), var(--fi-line));
+  background-size: 100% 5px, 100% 1px;
+  background-position: left top, left top;
+}
+
+/* ---------- setup: module plates ------------------------------------ */
+
+.crt .module-list,
+.crt .picked-list {
+  gap: 10px;
+}
+
+/* Deliberately no corner brackets here: the panel already carries them,
+   and ten nested bracketed plates reads as noise on the busiest screen. */
+.crt .module-card {
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  padding: 14px;
+  gap: 12px;
+}
+
+/* plate description left, difficulty keys right */
+.crt .module-card-info {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+/* flex-shrink MUST stay 1: game.css gives this group `flex-wrap: wrap`, and
+   `flex: 0 0 auto` defeats it — the three difficulty keys hold their ~380px
+   max-content width and push the whole document sideways below ~480px
+   (iPad Slide Over, Stage Manager, phones on Pages). At >= 480px there is
+   slack, so the right-aligned key column is visually unchanged. */
+.crt .module-card-add {
+  flex: 0 1 auto;
+  gap: 6px;
+}
+
+.crt .module-card-info strong {
+  font-family: var(--fi-font);
+  font-size: 1em;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  color: var(--fi-hot);
+  text-shadow: var(--fi-glow);
+}
+
+.crt .module-card-info p {
+  color: var(--fi-ink);
+}
+
+.crt .module-card-targets {
+  font-family: var(--fi-font) !important;
+  font-size: 0.78em !important;
+  letter-spacing: var(--fi-track-tight);
+  text-transform: var(--fi-caps);
+  /* game.css marks the targets colour !important; match it to win */
+  color: var(--fi-dim) !important;
+}
+
+.crt .module-card-secondary {
+  color: var(--fi-dim);
+}
+
+.crt .fi-slot {
+  font-family: var(--fi-font);
+  font-size: 0.72em;
+  letter-spacing: var(--fi-track-sm);
+  color: var(--fi-dim);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.crt .module-card-add button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  line-height: 1.2;
+}
+
+.crt .fi-key-main {
+  font-size: 0.9em;
+  letter-spacing: var(--fi-track-tight);
+  text-transform: var(--fi-caps);
+}
+
+.crt .fi-key-sub {
+  font-size: 0.72em;
+  color: var(--fi-dim);
+  letter-spacing: 0.06em;
+}
+
+/* the case bottom's 2 x 3 module rack, mirrored from the 3D case */
+.crt .fi-bays {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  max-width: 280px;
+  margin: 0 0 14px;
+}
+
+.crt .fi-bay {
+  border: var(--fi-stroke) solid var(--fi-line);
+  color: var(--fi-dim);
+  font-family: var(--fi-font);
+  font-size: 0.74em;
+  letter-spacing: var(--fi-track-sm);
+  text-align: center;
+  padding: 7px 0;
+}
+
+.crt .fi-bay-on {
+  background: var(--fi-hot);
+  border-color: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  font-weight: 700;
+}
+
+.crt .picked-list {
+  counter-reset: fi-slot;
+}
+
+.crt .picked-list li {
+  counter-increment: fi-slot;
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  padding: 8px 12px;
+}
+
+.crt .picked-list li > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--fi-font);
+  letter-spacing: 0.08em;
+  text-transform: var(--fi-caps);
+  font-size: 0.92em;
+  color: var(--fi-ink);
+}
+
+.crt .picked-list li > span:first-child::before {
+  content: 'BAY ' counter(fi-slot, decimal-leading-zero);
+  flex: none;
+  font-size: 0.8em;
+  letter-spacing: var(--fi-track-sm);
+  color: var(--fi-ink-on-hot);
+  background: var(--fi-hot);
+  padding: 2px 7px;
+}
+
+.crt .setup-replay-notice {
+  margin: 0;
+  border: var(--fi-stroke) solid var(--fi-hot);
+  border-radius: 0;
+  background: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  font-family: var(--fi-font);
+  font-size: 0.88em;
+  padding: 10px 14px;
+}
+
+.crt .fi-launch {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.crt .fi-launch-note {
+  margin: 0;
+  font-family: var(--fi-font);
+  font-size: 0.78em;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  color: var(--fi-dim);
+  text-align: center;
+}
+
+/* ---------- how to play: engraved step rows -------------------------- */
+
+.crt .fi-steps {
+  list-style: none;
+  counter-reset: fi-step;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.crt .fi-steps li {
+  counter-increment: fi-step;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: var(--fi-stroke) solid var(--fi-line);
+  color: var(--fi-ink);
+}
+
+.crt .fi-steps li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.crt .fi-steps li > span {
+  min-width: 0;
+}
+
+.crt .fi-steps li::before {
+  content: counter(fi-step, decimal-leading-zero);
+  flex: none;
+  font-family: var(--fi-font);
+  font-size: 0.86em;
+  font-weight: 700;
+  letter-spacing: var(--fi-track-tight);
+  color: var(--fi-ink-on-hot);
+  background: var(--fi-hot);
+  padding: 2px 8px;
+  margin-top: 0.15em;
+}
+
+.crt .fi-steps li strong,
+.crt .fi-prose strong,
+.crt .home-sub strong {
+  color: var(--fi-hot);
+  font-family: var(--fi-font);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- settings ------------------------------------------------- */
+
+.crt .fi-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  font-size: 0.9em;
+}
+
+.crt .fi-switch::before {
+  content: '';
+  display: inline-block;
+  flex: none;
+  width: 0.8em;
+  height: 0.8em;
+  margin-right: 0.6em;
+  border: var(--fi-stroke) solid currentColor;
+}
+
+.crt .fi-switch.btn-primary::before {
+  background: currentColor;
+}
+
+/* the app's only range input — hand-built, 48px hit area kept */
+.crt input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  max-width: 220px;
+  flex: 1 1 150px;
+  height: var(--touch);
+  min-height: var(--touch);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.crt input[type='range']:disabled {
+  cursor: not-allowed;
+}
+
+.crt input[type='range']::-webkit-slider-runnable-track {
+  height: 12px;
+  border: var(--fi-stroke) solid var(--fi-line);
+  background-color: var(--fi-well);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--fi-line-soft) 0 1px,
+    transparent 1px 10%
+  );
+}
+
+/* Hand-drawing the range removed the native greyed-out state, so the
+   unarmed slider has to be drawn too — otherwise Sound effects = Off
+   leaves a control that looks live and does nothing. Same dashed +
+   hatched + unlit vocabulary as `.crt button:disabled`, so "inactive"
+   reads the same way everywhere and never depends on colour. Vendor
+   pseudo-elements cannot be comma-grouped — one unknown selector voids
+   the whole rule — so -webkit and -moz are written out separately. */
+.crt input[type='range']:disabled::-webkit-slider-runnable-track {
+  border-style: dashed;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(90, 74, 48, 0) 0 6px,
+    rgba(90, 74, 48, 0.5) 6px 7px
+  );
+}
+
+.crt input[type='range']:disabled::-webkit-slider-thumb {
+  background: var(--fi-well);
+  border-color: var(--fi-line);
+  border-style: dashed;
+}
+
+.crt input[type='range']:disabled::-moz-range-track {
+  border-style: dashed;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(90, 74, 48, 0) 0 6px,
+    rgba(90, 74, 48, 0.5) 6px 7px
+  );
+}
+
+.crt input[type='range']:disabled::-moz-range-thumb {
+  background: var(--fi-well);
+  border-color: var(--fi-line);
+  border-style: dashed;
+}
+
+.crt input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 30px;
+  margin-top: -10px;
+  border: 1px solid var(--fi-brass);
+  border-radius: 0;
+  background: var(--fi-hot);
+}
+
+.crt input[type='range']::-moz-range-track {
+  height: 12px;
+  border: var(--fi-stroke) solid var(--fi-line);
+  background-color: var(--fi-well);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--fi-line-soft) 0 1px,
+    transparent 1px 10%
+  );
+}
+
+.crt input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 30px;
+  border: 1px solid var(--fi-brass);
+  border-radius: 0;
+  background: var(--fi-hot);
+}
+
+.crt .fi-meter {
+  font-family: var(--fi-font);
+  font-size: 0.95em;
+  letter-spacing: var(--fi-track-tight);
+  color: var(--fi-hot);
+  min-width: 4ch;
+  text-align: right;
+}
+
+/* the value readout goes unlit with its slider (adjacent sibling in
+   Settings.tsx) — 8.2:1, dimmed but never unreadable */
+.crt input[type='range']:disabled + .fi-meter {
+  color: var(--fi-dim);
+}
+
+/* ---------- logbook: a strip-chart printout -------------------------- */
+
+.crt .logbook-actions {
+  align-items: center;
+  gap: 10px;
+}
+
+/* sits beside the key rather than under it while there is room, and drops
+   to its own line on a narrow window (slp.css already wraps this row) */
+.crt .logbook-actions .fi-launch-note {
+  flex: 1 1 240px;
+  min-width: 0;
+  text-align: left;
+}
+
+.crt .fi-scroll {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--fi-pad));
+  padding: 0 var(--fi-pad);
+}
+
+.crt .logbook-table {
+  font-family: var(--fi-font);
+  font-size: 0.86em;
+}
+
+/* The caption strip is allowed to wrap ("Handler / tally" over two
+   lines). Pinning it to one line is what makes the nine columns
+   overflow their scroller at large text — the data cells are far
+   narrower than their own headings. */
+.crt .logbook-table th {
+  background: var(--fi-hot);
+  color: var(--fi-ink-on-hot);
+  border-bottom: 0;
+  padding: 7px 8px;
+  font-size: 0.86em;
+  font-weight: 700;
+  letter-spacing: var(--fi-track-sm);
+  text-transform: var(--fi-caps);
+  vertical-align: bottom;
+}
+
+/* Each row is one readout line rather than a ragged block, and .fi-scroll
+   takes any overflow. The one exception is the free-text Team column: at
+   two 12-character labels it is ~250px wide on its own and pushes the
+   Delete key past the scroller, so it alone is allowed to wrap. With it
+   wrapping the table lands within a pixel or two of the scroller's width
+   on an iPad in landscape, and .fi-scroll absorbs the rest — so large
+   text tips the table into its own scroller, never into page-level
+   horizontal overflow. (Don't re-record exact pixel counts here: they
+   move with the font stack and the largeText scale.) */
+.crt .logbook-table td {
+  border-bottom: var(--fi-stroke) solid var(--fi-line);
+  padding: 10px 8px;
+  color: var(--fi-ink);
+  white-space: nowrap;
+}
+
+.crt .logbook-table td.fi-wrap {
+  white-space: normal;
+}
+
+.crt .logbook-table tbody tr:nth-child(even) td {
+  background: rgba(255, 179, 71, 0.04);
+}
+
+/* Delete is the one control that could scroll off the visible edge: with
+   Large text on an iPad in portrait the nine columns run ~870px inside a
+   ~754px scroller, putting the key ~120px past the right edge — reachable
+   only by a sideways swipe, in exactly the mode a student who needs it is
+   using. Pin the last column instead; the row scrolls underneath it. The
+   cell needs its own opaque backing (collapsed-border tables don't carry
+   a cell's borders along when it sticks, and the row would otherwise read
+   straight through it), so the panel colour is restated here and the
+   separating hairline is drawn as an inset shadow. --fi-panel collapses to
+   #000 under high contrast, so both modes are covered by the same rule. A
+   browser that declines sticky here simply falls back to today's
+   scroll-to-reach behaviour — nothing becomes unreachable. */
+.crt .logbook-table th:last-child,
+.crt .logbook-table td:last-child {
+  position: sticky;
+  /* .fi-scroll is padded so the strip-chart bleeds to the panel edge;
+     pinning at right:0 would leave that padding as a gap for the scrolled
+     columns to show through beside the key, so the offset cancels it. */
+  right: calc(-1 * var(--fi-pad));
+  z-index: 1;
+}
+
+.crt .logbook-table td:last-child {
+  background-color: var(--fi-panel);
+  background-image: none;
+  box-shadow: inset 1px 0 0 var(--fi-line);
+}
+
+/* beats the striping rule above on specificity, so the tint is re-applied
+   as an image over the opaque backing rather than replacing it */
+.crt .logbook-table tbody tr:nth-child(even) td:last-child {
+  background-color: var(--fi-panel);
+  background-image: linear-gradient(rgba(255, 179, 71, 0.04), rgba(255, 179, 71, 0.04));
+}
+
+.crt .mission-code {
+  font-family: var(--font-mono);
+  background: var(--fi-well);
+  border: var(--fi-stroke) solid var(--fi-line);
+  border-radius: 0;
+  color: var(--fi-hot);
+  padding: 4px 10px;
+  letter-spacing: 0.16em;
+  text-shadow: var(--fi-glow);
+  white-space: nowrap;
+}
+
+/* ---------- narrow screens ------------------------------------------- */
+
+@media (max-width: 760px) {
+  .crt .fi-console {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .crt .card > h2,
+  .crt .fi-panel > h2 {
+    position: static;
+    transform: none;
+    width: auto;
+    max-width: none;
+    padding: 0 0 10px;
+    background: none;
+  }
+
+  .crt .card,
+  .crt .fi-panel {
+    padding-top: var(--fi-pad);
+  }
+}
+
+/* ==================================================================
+   ACCESSIBILITY SUPPRESSION — constraint 2.
+   html.a11y-high-contrast only redefines the base tokens and
+   html.a11y-reduced-motion only zeroes animation durations, so every
+   effect this file introduces is switched off here by re-declaring the
+   token it lives in. No !important, no universal selectors.
+   ================================================================== */
+
+/* --- reduced motion: no banding, no glow, no bloom, no rake --- */
+html.a11y-reduced-motion .crt {
+  --fi-scan: 0;
+  --fi-glow: none;
+  --fi-glow-soft: none;
+  --fi-led-glow: none;
+  --fi-rake: none;
+}
+
+/* `html .crt`, not `.crt`: a media query adds no specificity, so a bare
+   `.crt` here would tie the base block at the top of this file and win
+   only on source order — fragile if this block is ever moved or split
+   out. The descendant `html` makes it win on specificity instead. */
+@media (prefers-reduced-motion: reduce) {
+  html .crt {
+    --fi-scan: 0;
+    --fi-glow: none;
+    --fi-glow-soft: none;
+    --fi-led-glow: none;
+    --fi-rake: none;
+  }
+}
+
+/* --- high contrast: pure #000 ground, white strokes, 2px hairlines,
+       every effect off. Amber is kept for readouts and filled bars:
+       #ffb347 on #000 is 11.8:1 and index.css's own high-contrast block
+       leaves --amber alone, so the rest of the app stays amber too. --- */
+html.a11y-high-contrast .crt {
+  --fi-void: #000000;
+  --fi-face: #000000;
+  --fi-panel: #000000;
+  --fi-well: #000000;
+  --fi-line: #ffffff;
+  --fi-line-soft: #ffffff;
+  --fi-brass: #ffffff;
+  --fi-stroke: 2px;
+  --fi-ink: #ffffff;
+  --fi-dim: #ffffff;
+  --fi-hot: #ffb347; /* 11.8:1 on #000; ink below is 11.8:1 on it */
+  --fi-ink-on-hot: #000000;
+  --fi-led: #4cc38a;
+  --fi-scan: 0;
+  --fi-glow: none;
+  --fi-glow-soft: none;
+  --fi-led-glow: none;
+  --fi-rake: none;
+}
+
+html.a11y-high-contrast .crt .logbook-table tbody tr:nth-child(even) td {
+  background: transparent;
+}
+
+/* ...except the pinned Delete cell, which must stay opaque or the rows
+   scrolling behind it show through. #000 on #000 keeps the palette pure. */
+html.a11y-high-contrast .crt .logbook-table td:last-child,
+html.a11y-high-contrast .crt .logbook-table tbody tr:nth-child(even) td:last-child {
+  background-color: var(--fi-panel);
+  background-image: none;
+}
+
+/* The hatch is the load-bearing "unarmed" cue, so high contrast must
+   restate it rather than drop it — with --fi-dim and --fi-ink both
+   collapsed to #fff, dashed-vs-solid border was the only thing left
+   separating a disabled key from an enabled one. The stock hatch is a
+   dark olive that vanishes on #000, so it is redrawn in white. Kept at
+   0.30 alpha: over #000 that is L=0.073, so the white label still sits
+   at 8.5:1 on the hatch lines themselves, and the palette stays pure
+   black-and-white. Texture also survives greyscale, which colour would
+   not. */
+html.a11y-high-contrast .crt button:disabled {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0 6px,
+    rgba(255, 255, 255, 0.3) 6px 7px
+  );
+}
+
+html.a11y-high-contrast .crt input[type='range']:disabled::-webkit-slider-runnable-track {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0 6px,
+    rgba(255, 255, 255, 0.3) 6px 7px
+  );
+}
+
+html.a11y-high-contrast .crt input[type='range']:disabled::-moz-range-track {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0) 0 6px,
+    rgba(255, 255, 255, 0.3) 6px 7px
+  );
+}
+
+/* --- easier-reading mode: drop the monospace face, the all-caps, the
+       wide tracking, and open the prose leading --- */
+html.a11y-dyslexia .crt {
+  --fi-font: var(--font-body);
+  --fi-caps: none;
+  --fi-track: 0.02em;
+  --fi-track-sm: 0.02em;
+  --fi-track-tight: 0.01em;
+  --fi-lh: 1.85;
+}
