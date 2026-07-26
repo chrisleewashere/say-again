@@ -133,6 +133,9 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
   const [zoomed, setZoomed] = useState<CameraPose | null>(null);
   const [faceStatus, setFaceStatus] = useState('');
   const [a11yPanel, setA11yPanel] = useState(false);
+  /* Mission-tools tray in the zoomed HUD. Collapsed by default so the face keeps
+     the whole centre of the screen; opening it is a deliberate act. */
+  const [hudTrayOpen, setHudTrayOpen] = useState(false);
   const poseGetters = useRef(new Map<number, () => CameraPose | null>());
   const slots = useMemo(() => baySlots(runner.instances.length), [runner.instances.length]);
   const reducedMotion =
@@ -153,6 +156,7 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
       prevModuleIndex.current = runner.moduleIndex;
       setZoomed(null);
       setA11yPanel(false);
+      setHudTrayOpen(false);
       setFaceStatus('');
     }
   }, [runner.moduleIndex]);
@@ -307,28 +311,50 @@ export function MissionRun3D({ config, a11y, onFinish }: MissionRun3DProps) {
 
       <div className="scene-chrome scene-chrome-bottom">
         {panelOpen ? (
-          <button className="scene-back-btn" onClick={() => { setZoomed(null); setA11yPanel(false); }}>
+          <button className="scene-back-btn" onClick={() => { setZoomed(null); setA11yPanel(false); setHudTrayOpen(false); }}>
             &larr; Step back to the case
           </button>
         ) : zoomedIn && activeHasFace ? (
+          /* Corner-anchored HUD. This used to be a full-width centred strip that
+             floated over the bottom ~23% of the viewport, which covered the lower
+             rows of taller faces (vault-dial's keypad) and swallowed their taps.
+             Everything now hugs the corners; the centre — where the face is — is
+             never under chrome. Hint and the accessible-panel entry live behind
+             the single expander so they cost no face area until asked for. */
           <div className="scene-zoom-hud">
-            <button className="scene-back-btn" onClick={() => setZoomed(null)}>
-              &larr; Step back
-            </button>
-            <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
-            {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
-            <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
-            <p className="scene-status" role="status">{faceStatus}</p>
-            {config.hintsAllowed && <HintPanel runner={runner} />}
-            <button className="scene-a11y-btn" onClick={() => setA11yPanel(true)}>
-              Accessible panel
-            </button>
+            <div className="scene-hud-cluster scene-hud-cluster-left">
+              <button className="scene-back-btn" onClick={() => { setZoomed(null); setHudTrayOpen(false); }}>
+                &larr; Step back
+              </button>
+              <span className="scene-panel-tag">{activeDef.codename.toUpperCase()}</span>
+              <ModuleLamp state={lampState} wrongs={runner.moduleStrikes} limit={config.maxStrikes} />
+              <p className="scene-status" role="status">{faceStatus}</p>
+            </div>
+            <div className="scene-hud-cluster scene-hud-cluster-right">
+              {hudTrayOpen && (
+                <div className="scene-hud-tray" id="scene-hud-tray">
+                  {runner.isStatic && <StaticBadge depth={runner.repairDrills} />}
+                  {config.hintsAllowed && <HintPanel runner={runner} />}
+                  <button className="scene-a11y-btn" onClick={() => setA11yPanel(true)}>
+                    Accessible panel
+                  </button>
+                </div>
+              )}
+              <button
+                className={`scene-hud-toggle${hudTrayOpen ? ' scene-hud-toggle-open' : ''}`}
+                aria-expanded={hudTrayOpen}
+                aria-controls="scene-hud-tray"
+                onClick={() => setHudTrayOpen((v) => !v)}
+              >
+                <span aria-hidden="true">{hudTrayOpen ? '×' : '⋯'}</span>
+                <span className="sr-only">
+                  {hudTrayOpen ? 'Close mission tools' : 'Mission tools: hints and accessible panel'}
+                </span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="scene-hint-row">
-            <p className="scene-hint" role="status">
-              Drag (or use arrow keys) to turn the case · tap the lit module to work on it
-            </p>
             {platesReady && !runner.finished && (
               <button className="scene-open-btn" onClick={() => openActivePanel()}>
                 Open the lit panel

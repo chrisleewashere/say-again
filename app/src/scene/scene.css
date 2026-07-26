@@ -38,13 +38,16 @@
   background: linear-gradient(to top, rgba(10, 13, 17, 0.85), transparent);
 }
 
-.scene-hint {
-  margin: 0;
-  color: var(--text-low);
-  font-size: 0.9em;
-  letter-spacing: 0.03em;
+/* While a face is being worked, the corner HUD does its own spacing and the
+   scrim would just dim the bottom of the face. Drop both. */
+.scene-chrome-bottom:has(> .scene-zoom-hud) {
+  padding: 0;
+  background: none;
 }
 
+/* .scene-hint (the "drag to turn the case · tap the lit module" directions)
+   was removed deliberately — it earned nothing after the first mission and
+   only added chrome over the case. The row now carries just the open button. */
 .scene-hint-row {
   display: flex;
   align-items: center;
@@ -63,14 +66,46 @@
   border-color: var(--amber-deep);
 }
 
-/* zoom HUD: chrome strip while operating an in-scene face */
+/* ---------- zoom HUD ------------------------------------------------------
+   Corner-anchored, NOT a bottom strip. The old centred strip sat in the bottom
+   ~23% of the viewport at z-index 20 with pointer-events:auto children, so on
+   taller faces (vault-dial's keypad) it covered the lower key rows and ate
+   their taps. The HUD now spans the viewport but is itself click-through;
+   only the two corner clusters take pointer events, so the centre — where the
+   face lives — is always free. */
 .scene-zoom-hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  padding: calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
+           calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+}
+
+/* .scene-chrome > * sets pointer-events:auto; the HUD must opt back out or the
+   full-viewport layer would swallow every tap meant for the face. */
+.scene-chrome-bottom > .scene-zoom-hud {
+  pointer-events: none;
+}
+
+.scene-hud-cluster {
+  position: absolute;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 900px;
+  align-items: flex-start;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.scene-hud-cluster-left {
+  left: calc(12px + env(safe-area-inset-left));
+  flex-direction: column;
+  max-width: min(42vw, 340px);
+}
+
+.scene-hud-cluster-right {
+  right: calc(12px + env(safe-area-inset-right));
+  flex-direction: row-reverse;
+  align-items: flex-end;
 }
 
 .scene-status {
@@ -79,13 +114,48 @@
   font-family: var(--font-mono);
   font-size: 0.85em;
   letter-spacing: 0.02em;
-  max-width: 380px;
+  max-width: 340px;
+}
+
+/* the single expander: everything optional hides behind this */
+.scene-hud-toggle {
+  width: var(--touch);
+  height: var(--touch);
+  min-width: var(--touch);
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(20, 26, 34, 0.92);
+  border: 1px solid var(--amber-deep);
+  color: var(--amber);
+  font-size: 1.25em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-hud-toggle-open {
+  background: var(--amber);
+  color: #1a1205;
+}
+
+.scene-hud-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(15, 20, 26, 0.96);
+  box-shadow: var(--shadow);
+  max-width: min(60vw, 320px);
 }
 
 .scene-a11y-btn {
   background: transparent;
   border-color: var(--bg-3);
-  color: var(--text-low);
+  color: var(--text-mid);
   font-size: 0.85em;
 }
 

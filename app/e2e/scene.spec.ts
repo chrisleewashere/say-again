@@ -22,8 +22,10 @@ test('field case: open, zoom, solve on the in-scene face, debrief', async ({ pag
   const instance = generateWireMaze(seed, 1);
   const solution = solveWireMaze(instance.state);
 
-  // case-open ritual finishes, plates rack in
-  await expect(page.locator('.scene-hint')).toBeVisible({ timeout: 60_000 });
+  // case-open ritual finishes, plates rack in. (The old readiness sentinel was
+  // .scene-hint, the "drag to turn the case" directions line — removed, since
+  // students have it after a mission or two. .scene-open-btn is the real signal:
+  // it only renders once the plates are racked.)
   await page.waitForSelector('.scene-open-btn', { timeout: 60_000 });
   await page.waitForTimeout(2500);
 
