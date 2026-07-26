@@ -17,7 +17,7 @@ import { PLATE_SIZE, zoomPoseFromWorld } from './layout';
 import type { CameraPose } from './CameraRig';
 import { FaceSurface } from './FaceSurface';
 import { getFace } from './faces';
-import { CASE_ALUMINUM_WORN, FACEPLATE_PHENOLIC, LAMP_AMBER, LAMP_GREEN, LAMP_OFF, LAMP_RED, SCREW_STEEL } from './materials';
+import { CASE_ALUMINUM_WORN, FACEPLATE_PHENOLIC, SCREW_STEEL } from './materials';
 import './scene.css';
 
 export type BayState = 'locked' | 'active' | 'solved' | 'failed';
@@ -51,13 +51,6 @@ const STATUS_WORD: Record<BayState, string> = {
   active: 'IN OPERATION',
   solved: 'PASSED',
   failed: 'FAILED',
-};
-
-const LAMP: Record<BayState, THREE.Material> = {
-  locked: LAMP_OFF,
-  active: LAMP_AMBER,
-  solved: LAMP_GREEN,
-  failed: LAMP_RED,
 };
 
 /** Simple original hardware glyph per state — dials for live, bars for sealed. */
@@ -113,13 +106,15 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
   const def = getModule(instance.moduleId);
   const groupRef = useRef<THREE.Group>(null);
   const s = PLATE_SIZE;
-  const screwOff = s / 2 + 0.02;
-  /* The face is INSET so the plate has a real bezel. It used to be s + 0.14
-     against a plate of s + 0.18 — a 0.02 margin — which meant the screws and
-     the status jewel were drawn on top of the artwork, and the jewel collided
-     with the module title wherever it was placed. At s - 0.02 the bezel is
-     0.10 wide, enough to carry the hardware clear of the face. */
-  const FACE_SIZE = s - 0.02;
+  /* Screws sit as far out on the bezel as the plate allows: plate half-width is
+     s/2 + 0.09 and the screw radius is 0.026, so s/2 + 0.055 keeps them fully on
+     the plate (outer edge 0.611 < 0.62) while freeing the most face area. */
+  const screwOff = s / 2 + 0.055;
+  /* The face is inset just enough to clear the screw heads (inner edge
+     s/2 + 0.029), and no further — every unit of inset is play surface lost.
+     It used to run to s + 0.14 against a plate of s + 0.18, so the screws were
+     drawn straight onto the artwork. */
+  const FACE_SIZE = s + 0.05;
   const face = state === 'active' ? getFace(instance.moduleId) : undefined;
   const liveFace = face && faceHandlers ? face : undefined;
 
@@ -160,17 +155,15 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
           <cylinderGeometry args={[0.026, 0.026, 0.015, 10]} />
         </mesh>
       ))}
-      {/* Status jewel: amber = live, green = passed, red = failed, dark = sealed.
-          Lives on the BEZEL MARGIN, centred between the two top screws — the same
-          ring the screws sit on. It used to be inset by 0.09 from the corner screw,
-          which put it on top of the face content and collided with the title the
-          face texture draws there. The bezel has no content, so it can never
-          overlap at any face size. */}
-      <mesh position={[0, screwOff + 0.03, 0.01]} material={LAMP[state]}>
-        <sphereGeometry args={[0.045, 14, 10]} />
-      </mesh>
+      {/* No status jewel. It was dropped deliberately: it earned nothing that
+          the plate does not already say more clearly, and wherever it was put
+          it collided with the face artwork. Bay state still reads four ways,
+          none of them colour-only — the amber light pool on the live plate, the
+          FaceGlyph (dial / tick / lock / cross), the STATUS_WORD legend
+          (IN OPERATION / PASSED / SEALED / FAILED), and the lockdown bars on a
+          failed plate. */}
       {/* the lit module glows: a soft amber pool so the active plate reads
-          across the room, not just by its corner jewel */}
+          across the room */}
       {state === 'active' && (
         <pointLight position={[0, 0, 0.55]} color="#ffb347" intensity={0.55} distance={1.6} decay={2} />
       )}
