@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { allSessions, deleteSession, recentSessions, sessionsToCsv, type SessionRecord } from './db';
 import './slp.css';
 import '../game/game.css';
+import '../game/crt.css';
 
 interface LogbookProps {
   onBack: () => void;
@@ -66,70 +67,88 @@ export function Logbook({ onBack }: LogbookProps) {
   };
 
   return (
-    <main className="screen">
-      <header className="screen-header">
-        <button onClick={onBack} aria-label="Back to home">&larr; Back</button>
-        <h1>Logbook</h1>
-      </header>
-
-      <p className="home-sub" style={{ maxWidth: 'none' }}>
-        Sessions are stored only on this device. Tally columns show correct / prompted / incorrect.
-      </p>
-
-      <div className="logbook-actions">
-        <button className="btn-primary" onClick={exportCsv} disabled={sessions.length === 0}>
-          {exported ? 'Exported ✓' : 'Export CSV'}
-        </button>
-      </div>
-
-      <section className="card">
-        {sessions.length === 0 ? (
-          <p className="logbook-empty">No sessions yet. Finish a mission and it will appear here.</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table className="logbook-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Mission</th>
-                  <th>Team</th>
-                  <th>Grade</th>
-                  <th>Outcome</th>
-                  <th>Solved</th>
-                  <th>Agent tally</th>
-                  <th>Handler tally</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s) => (
-                  <tr key={s.id}>
-                    <td>{new Date(s.startedAt).toLocaleDateString()}</td>
-                    <td><span className="mission-code">{s.code}</span></td>
-                    <td>{[s.studentA, s.studentB].filter(Boolean).join(' & ') || '—'}</td>
-                    <td>{s.grade ?? '—'}</td>
-                    <td>{s.outcome}</td>
-                    <td>
-                      {s.modules.filter((m) => m.solved).length}/{s.modules.length}
-                    </td>
-                    <td>{tallySummary(s, 'A')}</td>
-                    <td>{tallySummary(s, 'B')}</td>
-                    <td>
-                      <button
-                        onClick={() => remove(s.id)}
-                        className={confirmingId === s.id ? 'btn-primary' : ''}
-                        aria-label={confirmingId === s.id ? `Tap again to permanently delete session ${s.code}` : `Delete session ${s.code}`}
-                      >
-                        {confirmingId === s.id ? 'Delete? Tap again' : 'Delete'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <main className="screen crt">
+      <div className="fi-frame">
+        <header className="screen-header">
+          <button onClick={onBack} aria-label="Back to home">&larr; Back</button>
+          <h1>Logbook</h1>
+          <div className="fi-readout">
+            <span className="fi-readout-cap">Records held</span>
+            <strong className="fi-readout-val">{String(sessions.length).padStart(2, '0')}</strong>
           </div>
-        )}
-      </section>
+        </header>
+
+        <p className="fi-prose">
+          Sessions are stored only on this device. Tally columns show correct / prompted / incorrect.
+        </p>
+
+        <div className="logbook-actions">
+          <button className="btn-primary" onClick={exportCsv} disabled={sessions.length === 0}>
+            {exported ? 'Exported ✓' : 'Export CSV'}
+          </button>
+          {/* Words are the primary "unarmed" channel on the other screens
+              (`.fi-statusbar` on Home, `.fi-launch-note` on Setup); this is
+              Logbook's, so a disabled key is never explained by styling
+              alone. */}
+          {sessions.length === 0 && (
+            <p className="fi-launch-note">Nothing to export yet — finish a mission first.</p>
+          )}
+        </div>
+
+        {/* The border-riding legend is what the panel's reserved top
+            padding is for — without an h2 that space reads as a stray gap. */}
+        <section className="card" aria-labelledby="logbook-records">
+          <h2 id="logbook-records">Session records</h2>
+          {sessions.length === 0 ? (
+            <p className="logbook-empty">No sessions yet. Finish a mission and it will appear here.</p>
+          ) : (
+            <div className="fi-scroll">
+              <table className="logbook-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Mission</th>
+                    <th>Team</th>
+                    <th>Grade</th>
+                    <th>Outcome</th>
+                    <th>Solved</th>
+                    <th>Agent tally</th>
+                    <th>Handler tally</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s) => (
+                    <tr key={s.id}>
+                      <td>{new Date(s.startedAt).toLocaleDateString()}</td>
+                      <td><span className="mission-code">{s.code}</span></td>
+                      {/* the only free-text column — it wraps so the row
+                          still fits without scrolling to reach Delete */}
+                      <td className="fi-wrap">{[s.studentA, s.studentB].filter(Boolean).join(' & ') || '—'}</td>
+                      <td>{s.grade ?? '—'}</td>
+                      <td>{s.outcome}</td>
+                      <td>
+                        {s.modules.filter((m) => m.solved).length}/{s.modules.length}
+                      </td>
+                      <td>{tallySummary(s, 'A')}</td>
+                      <td>{tallySummary(s, 'B')}</td>
+                      <td>
+                        <button
+                          onClick={() => remove(s.id)}
+                          className={confirmingId === s.id ? 'btn-primary' : ''}
+                          aria-label={confirmingId === s.id ? `Tap again to permanently delete session ${s.code}` : `Delete session ${s.code}`}
+                        >
+                          {confirmingId === s.id ? 'Delete? Tap again' : 'Delete'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   );
 }

@@ -13,6 +13,7 @@ import {
   type TimerMode,
 } from '../engine/types';
 import './game.css';
+import './crt.css';
 
 interface MissionSetupProps {
   /** Pre-filled mission code when replaying; otherwise a fresh one is generated. */
@@ -108,138 +109,168 @@ export function MissionSetup({ replayCode, onStart, onBack }: MissionSetupProps)
   }
 
   return (
-    <main className="screen setup-screen">
-      <header className="screen-header">
-        <button onClick={onBack} aria-label="Back to home">&larr; Back</button>
-        <h1>Mission Setup</h1>
-        <span className="mission-code" aria-label={`Mission code ${code}`}>{code}</span>
-      </header>
+    <main className="screen crt setup-screen">
+      <div className="fi-frame">
+        <header className="screen-header">
+          <button onClick={onBack} aria-label="Back to home">&larr; Back</button>
+          <h1>Mission Setup</h1>
+          <div className="fi-readout fi-readout-code">
+            <span className="fi-readout-cap">Mission code</span>
+            <span className="mission-code" aria-label={`Mission code ${code}`}>{code}</span>
+          </div>
+        </header>
 
-      {replayNotice && (
-        <p className="setup-replay-notice" role="status">{replayNotice}</p>
-      )}
-
-      <section className="card setup-section" aria-labelledby="setup-students">
-        <h2 id="setup-students">Team (optional — initials only)</h2>
-        <div className="setup-students-row">
-          <label>
-            Field Agent
-            <input value={studentA} onChange={(e) => { namesDirtyRef.current = true; setStudentA(e.target.value); }} maxLength={12} placeholder="e.g. JD" />
-          </label>
-          <label>
-            Handler
-            <input value={studentB} onChange={(e) => { namesDirtyRef.current = true; setStudentB(e.target.value); }} maxLength={12} placeholder="e.g. MK" />
-          </label>
-        </div>
-      </section>
-
-      <section className="card setup-section" aria-labelledby="setup-modules">
-        <h2 id="setup-modules">Puzzles</h2>
-        <div className="filter-row" role="group" aria-label="Filter puzzles by communication goal">
-          {TARGET_FILTERS.map((t) => (
-            <button
-              key={t}
-              className={`chip${filter === t ? ' chip-on' : ''}`}
-              aria-pressed={filter === t}
-              onClick={() => setFilter(t)}
-            >
-              {t === 'all' ? 'All goals' : THERAPY_TARGET_LABELS[t]}
-            </button>
-          ))}
-        </div>
-
-        <ul className="module-list">
-          {visible.map((m) => (
-            <li key={m.id} className="module-card">
-              <div className="module-card-info">
-                <strong>{m.codename}</strong>
-                <p>{m.tagline}</p>
-                <p className="module-card-targets">
-                  {THERAPY_TARGET_LABELS[m.targets.primary]}
-                  {m.targets.secondary.length > 0 && (
-                    <span className="module-card-secondary"> · {m.targets.secondary.map((t) => THERAPY_TARGET_LABELS[t]).join(' · ')}</span>
-                  )}
-                </p>
-              </div>
-              <div className="module-card-add" role="group" aria-label={`Add ${m.codename} at a difficulty`}>
-                {([1, 2, 3] as Difficulty[]).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => addModule(m.id, d)}
-                    disabled={picked.length >= CASE_CAPACITY}
-                    aria-label={`Add ${m.codename}, ${DIFFICULTY_LABELS[d]} difficulty, about ${m.minutes[d]} minutes`}
-                  >
-                    + {DIFFICULTY_LABELS[d]}
-                  </button>
-                ))}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card setup-section" aria-labelledby="setup-picked">
-        <h2 id="setup-picked">This mission ({picked.length} puzzle{picked.length === 1 ? '' : 's'}, ~{minutes} min)</h2>
-        {picked.length >= CASE_CAPACITY && (
-          <p className="setup-empty">The field case holds {CASE_CAPACITY} modules — remove one to swap in another.</p>
+        {replayNotice && (
+          <p className="setup-replay-notice" role="status">{replayNotice}</p>
         )}
-        {picked.length === 0 ? (
-          <p className="setup-empty">Add puzzles above. For a ~20 minute session, 2–3 puzzles works well.</p>
-        ) : (
-          <ol className="picked-list">
-            {picked.map((p, i) => {
-              const def = modules.find((m) => m.id === p.moduleId)!;
-              return (
-                <li key={i}>
-                  <span>{def.codename} — {DIFFICULTY_LABELS[p.difficulty]}</span>
-                  <button onClick={() => removeAt(i)} aria-label={`Remove ${def.codename} from mission`}>Remove</button>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
 
-      <section className="card setup-section" aria-labelledby="setup-pace">
-        <h2 id="setup-pace">Pace</h2>
-        <div className="filter-row" role="group" aria-label="Timer mode">
-          {(['relaxed', 'gentle', 'challenge'] as TimerMode[]).map((m) => (
-            <button key={m} className={`chip${timerMode === m ? ' chip-on' : ''}`} aria-pressed={timerMode === m} onClick={() => { configDirtyRef.current = true; setTimerMode(m); }}>
-              {m === 'relaxed' ? 'Relaxed — no timer' : m === 'gentle' ? 'Gentle timer' : 'Challenge timer'}
-            </button>
-          ))}
-        </div>
-        <div className="filter-row" role="group" aria-label="Wrong answers allowed per puzzle">
-          {[1, 2, 3].map((n) => (
-            <button key={n} className={`chip${maxStrikes === n ? ' chip-on' : ''}`} aria-pressed={maxStrikes === n} onClick={() => { configDirtyRef.current = true; setMaxStrikes(n); }}>
-              {n} wrong fails a puzzle
-            </button>
-          ))}
-        </div>
-        <div className="filter-row" role="group" aria-label="Static Protocol repair drills">
-          {[0, 1, 2, 3].map((n) => (
-            <button key={n} className={`chip${repairDrills === n ? ' chip-on' : ''}`} aria-pressed={repairDrills === n} onClick={() => { configDirtyRef.current = true; setRepairDrills(n); }}>
-              {n === 0 ? 'Static off' : `Static: ${n} say-again${n > 1 ? 's' : ''}`}
-            </button>
-          ))}
-        </div>
-        <p className="setup-note">
-          Static Protocol: on marked puzzles the Handler answers the Agent&rsquo;s first description
-          with neutral &ldquo;say again?&rdquo; requests (the manual has the script) — the Agent must
-          re-explain in different words. Builds repair skills.
-        </p>
-        <div className="filter-row" role="group" aria-label="In-game hints">
-          {[true, false].map((on) => (
-            <button key={String(on)} className={`chip${hintsAllowed === on ? ' chip-on' : ''}`} aria-pressed={hintsAllowed === on} onClick={() => { configDirtyRef.current = true; setHintsAllowed(on); }}>
-              {on ? 'Hints available' : 'No hints'}
-            </button>
-          ))}
-        </div>
-      </section>
+        <section className="card setup-section" aria-labelledby="setup-students">
+          <h2 id="setup-students">Team (optional — initials only)</h2>
+          <div className="setup-students-row">
+            <label>
+              Field Agent
+              <input value={studentA} onChange={(e) => { namesDirtyRef.current = true; setStudentA(e.target.value); }} maxLength={12} placeholder="e.g. JD" />
+            </label>
+            <label>
+              Handler
+              <input value={studentB} onChange={(e) => { namesDirtyRef.current = true; setStudentB(e.target.value); }} maxLength={12} placeholder="e.g. MK" />
+            </label>
+          </div>
+        </section>
 
-      <button className="btn-primary home-big-btn" disabled={picked.length === 0} onClick={start}>
-        Start Mission
-      </button>
+        <section className="card setup-section" aria-labelledby="setup-modules">
+          <h2 id="setup-modules">Puzzles</h2>
+          <p className="fi-cap" aria-hidden="true">Filter by goal</p>
+          <div className="filter-row" role="group" aria-label="Filter puzzles by communication goal">
+            {TARGET_FILTERS.map((t) => (
+              <button
+                key={t}
+                className={`chip${filter === t ? ' chip-on' : ''}`}
+                aria-pressed={filter === t}
+                onClick={() => setFilter(t)}
+              >
+                {t === 'all' ? 'All goals' : THERAPY_TARGET_LABELS[t]}
+              </button>
+            ))}
+          </div>
+
+          <ul className="module-list">
+            {visible.map((m, i) => (
+              <li key={m.id} className="module-card">
+                <div className="module-card-info">
+                  <span className="fi-slot" aria-hidden="true">M-{String(i + 1).padStart(2, '0')}</span>
+                  <strong>{m.codename}</strong>
+                  <p>{m.tagline}</p>
+                  <p className="module-card-targets">
+                    {THERAPY_TARGET_LABELS[m.targets.primary]}
+                    {m.targets.secondary.length > 0 && (
+                      <span className="module-card-secondary"> · {m.targets.secondary.map((t) => THERAPY_TARGET_LABELS[t]).join(' · ')}</span>
+                    )}
+                  </p>
+                </div>
+                <div className="module-card-add" role="group" aria-label={`Add ${m.codename} at a difficulty`}>
+                  {([1, 2, 3] as Difficulty[]).map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => addModule(m.id, d)}
+                      disabled={picked.length >= CASE_CAPACITY}
+                      aria-label={`Add ${m.codename}, ${DIFFICULTY_LABELS[d]} difficulty, about ${m.minutes[d]} minutes`}
+                    >
+                      <span className="fi-key-main">+ {DIFFICULTY_LABELS[d]}</span>
+                      <span className="fi-key-sub">{m.minutes[d]} min</span>
+                    </button>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="card setup-section" aria-labelledby="setup-picked">
+          <h2 id="setup-picked">This mission ({picked.length} puzzle{picked.length === 1 ? '' : 's'}, ~{minutes} min)</h2>
+          <div className="fi-bays" aria-hidden="true">
+            {Array.from({ length: CASE_CAPACITY }, (_, i) => (
+              <span key={i} className={`fi-bay${i < picked.length ? ' fi-bay-on' : ''}`}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+            ))}
+          </div>
+          {picked.length >= CASE_CAPACITY && (
+            <p className="setup-empty">The field case holds {CASE_CAPACITY} modules — remove one to swap in another.</p>
+          )}
+          {picked.length === 0 ? (
+            <p className="setup-empty">Add puzzles above. For a ~20 minute session, 2–3 puzzles works well.</p>
+          ) : (
+            <ol className="picked-list">
+              {picked.map((p, i) => {
+                const def = modules.find((m) => m.id === p.moduleId)!;
+                return (
+                  <li key={i}>
+                    <span>{def.codename} — {DIFFICULTY_LABELS[p.difficulty]}</span>
+                    <button onClick={() => removeAt(i)} aria-label={`Remove ${def.codename} from mission`}>Remove</button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </section>
+
+        <section className="card setup-section" aria-labelledby="setup-pace">
+          <h2 id="setup-pace">Pace</h2>
+
+          <p className="fi-cap" aria-hidden="true">Timer</p>
+          <div className="filter-row" role="group" aria-label="Timer mode">
+            {(['relaxed', 'gentle', 'challenge'] as TimerMode[]).map((m) => (
+              <button key={m} className={`chip${timerMode === m ? ' chip-on' : ''}`} aria-pressed={timerMode === m} onClick={() => { configDirtyRef.current = true; setTimerMode(m); }}>
+                {m === 'relaxed' ? 'Relaxed — no timer' : m === 'gentle' ? 'Gentle timer' : 'Challenge timer'}
+              </button>
+            ))}
+          </div>
+
+          <p className="fi-cap" aria-hidden="true">Wrong answers allowed per puzzle</p>
+          <div className="filter-row" role="group" aria-label="Wrong answers allowed per puzzle">
+            {[1, 2, 3].map((n) => (
+              <button key={n} className={`chip${maxStrikes === n ? ' chip-on' : ''}`} aria-pressed={maxStrikes === n} onClick={() => { configDirtyRef.current = true; setMaxStrikes(n); }}>
+                {n} wrong fails a puzzle
+              </button>
+            ))}
+          </div>
+
+          <p className="fi-cap" aria-hidden="true">Static Protocol</p>
+          <div className="filter-row" role="group" aria-label="Static Protocol repair drills">
+            {[0, 1, 2, 3].map((n) => (
+              <button key={n} className={`chip${repairDrills === n ? ' chip-on' : ''}`} aria-pressed={repairDrills === n} onClick={() => { configDirtyRef.current = true; setRepairDrills(n); }}>
+                {n === 0 ? 'Static off' : `Static: ${n} say-again${n > 1 ? 's' : ''}`}
+              </button>
+            ))}
+          </div>
+          <p className="setup-note">
+            Static Protocol: on marked puzzles the Handler answers the Agent&rsquo;s first description
+            with neutral &ldquo;say again?&rdquo; requests (the manual has the script) — the Agent must
+            re-explain in different words. Builds repair skills.
+          </p>
+
+          <p className="fi-cap" aria-hidden="true">In-game hints</p>
+          <div className="filter-row" role="group" aria-label="In-game hints">
+            {[true, false].map((on) => (
+              <button key={String(on)} className={`chip${hintsAllowed === on ? ' chip-on' : ''}`} aria-pressed={hintsAllowed === on} onClick={() => { configDirtyRef.current = true; setHintsAllowed(on); }}>
+                {on ? 'Hints available' : 'No hints'}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <div className="fi-launch">
+          <button className="btn-primary home-big-btn fi-run" disabled={picked.length === 0} onClick={start}>
+            Start Mission
+          </button>
+          <p className="fi-launch-note">
+            {picked.length === 0
+              ? 'Case empty — load at least one module'
+              : `${picked.length} of ${CASE_CAPACITY} bays loaded · about ${minutes} min`}
+          </p>
+        </div>
+      </div>
     </main>
   );
 }

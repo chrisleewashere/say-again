@@ -32,7 +32,7 @@ export function QualitySetting() {
   return (
     <section className="card setup-section" aria-labelledby="settings-quality">
       <h2 id="settings-quality">Graphics quality</h2>
-      <p className="home-sub" style={{ maxWidth: 'none' }}>
+      <p className="home-sub fi-prose">
         How detailed the 3D briefcase looks. Auto picks the best look this device can keep
         smooth and quietly steps down if things get choppy. Puzzles play the same at every
         setting.
@@ -55,7 +55,7 @@ export function QualitySetting() {
           );
         })}
       </div>
-      <p className="home-sub" style={{ maxWidth: 'none' }} aria-live="polite">
+      <p className="home-sub fi-prose" aria-live="polite">
         {quality.override === 'auto'
           ? `Auto is currently using ${effective}: ${TIER_BLURBS[effective]}.`
           : `${effective[0].toUpperCase()}${effective.slice(1)}: ${TIER_BLURBS[effective]}.`}
