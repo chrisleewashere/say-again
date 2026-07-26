@@ -59,9 +59,12 @@ export function zoomPoseFromWorld(
   plateWorldPos: [number, number, number],
   plateWorldNormal: [number, number, number],
 ): { position: [number, number, number]; target: [number, number, number] } {
-  // fits the full plate (PLATE_SIZE + bezel) inside a 42° fov with margin
-  // for the chrome strips — the face reads whole, title to status line
-  const dist = 1.78;
+  // Fits the full plate (PLATE_SIZE + bezel) inside a 42° fov with a real
+  // margin for the corner HUD. At 1.78 the plate filled a portrait iPad top to
+  // bottom, so the HUD clusters — anchored to the viewport corners — landed on
+  // the face and the Step-back button sat on the keypad's 7 key. Backing off
+  // leaves a band above and below the plate for chrome to live in.
+  const dist = 2.15;
   return {
     position: [
       plateWorldPos[0] + plateWorldNormal[0] * dist,

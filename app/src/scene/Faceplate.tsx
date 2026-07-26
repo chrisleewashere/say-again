@@ -114,6 +114,12 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
   const groupRef = useRef<THREE.Group>(null);
   const s = PLATE_SIZE;
   const screwOff = s / 2 + 0.02;
+  /* The face is INSET so the plate has a real bezel. It used to be s + 0.14
+     against a plate of s + 0.18 — a 0.02 margin — which meant the screws and
+     the status jewel were drawn on top of the artwork, and the jewel collided
+     with the module title wherever it was placed. At s - 0.02 the bezel is
+     0.10 wide, enough to carry the hardware clear of the face. */
+  const FACE_SIZE = s - 0.02;
   const face = state === 'active' ? getFace(instance.moduleId) : undefined;
   const liveFace = face && faceHandlers ? face : undefined;
 
@@ -160,7 +166,7 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
           which put it on top of the face content and collided with the title the
           face texture draws there. The bezel has no content, so it can never
           overlap at any face size. */}
-      <mesh position={[0, screwOff, 0.01]} material={LAMP[state]}>
+      <mesh position={[0, screwOff + 0.03, 0.01]} material={LAMP[state]}>
         <sphereGeometry args={[0.045, 14, 10]} />
       </mesh>
       {/* the lit module glows: a soft amber pool so the active plate reads
@@ -187,7 +193,7 @@ export function Faceplate({ slot, instance, state, onSelect, registerPoseGetter,
         <FaceSurface
           face={liveFace}
           instance={instance}
-          size={s + 0.14}
+          size={FACE_SIZE}
           interactive={!!zoomed}
           disabled={faceHandlers.disabled}
           onZoomRequest={select}
