@@ -1,7 +1,8 @@
 # Project State — Say Again?
 
 > Living onboarding digest for anyone (human or Claude session) picking up this repo.
-> Last updated: 2026-07-24 (Pages live, iOS simulator pass, strategy set to free).
+> Last updated: 2026-07-26 (CRT menus shipped, scene chrome fixed, plate jewel removed).
+> New session? Read `docs/HANDOFF.md` for the short version, then this file.
 
 ## What this is
 
@@ -131,14 +132,66 @@ deferred until actual launch, per Chris.
   Develop on and push to `main` now — per Chris, superseding earlier branch
   instructions. Repo stays PUBLIC (free Pages; private+Pages is paywalled).
 
-## Visual identity (decided 2026-07-24)
+## Visual identity — two layers, do not confuse them
 
-Chris chose **Tradecraft** (refined 1968 analog spycraft) from a 4-way agent
-competition (vs blackline/atomic/noir — files kept in `src/scene/themes/` for a
-possible future "case finish" setting; do not delete). All six plates rack in
-the case BOTTOM (2x3); the lid is the mission status board (phosphor clock,
-module jewels, brass plate). Mission ticking is default-on (Settings toggle).
-Theme = data (`SceneTheme`); active theme persists under `ky-scene-theme`.
+**The 3D case: Tradecraft** (decided 2026-07-24). Refined 1968 analog spycraft,
+chosen from a 4-way agent competition (vs blackline/atomic/noir — files kept in
+`src/scene/themes/` for a possible future "case finish" setting; do not delete).
+All six plates rack in the case BOTTOM (2x3); the lid is the mission status board
+(phosphor clock, module jewels, brass plate — the LID jewels are still there).
+Mission ticking is default-on (Settings toggle). Theme = data (`SceneTheme`);
+active theme persists under `ky-scene-theme`.
+
+**The 2D menus: amber CRT control panel** (decided 2026-07-25, shipped 2026-07-26).
+Home, Mission Setup, How to Play, Settings and Logbook are styled as an amber
+phosphor vector console — hairline square boxes nested bezel-into-screen-into-panel,
+legends breaking the top border stroke, inverted solid status bars, empty/filled
+checkbox columns, caption-strip-over-value readouts, a centred `** banner **`.
+Chosen from a 3-way competitive design pass (faithful-console vs phosphor-terminal
+vs field-instrument); **Field Instrument won** for reading as the briefcase's own
+control face before it opens. Reference idiom came from a photo of an IMAX
+projector console — the IDIOM only, never IMAX marks or trade dress.
+
+- **All of it lives in `src/game/crt.css` under a `.crt` root.** This scoping is
+  load-bearing: the stylesheets are global and unscoped, so `index.css`'s bare
+  `button {}`, `.card` and `.btn-primary` rules already reach `src/modules/**` and
+  `src/scene/**`. Retheming those bare selectors or the shared tokens will leak the
+  CRT look into the locked 3D case. Style inside `.crt`, not globally.
+- Long prose deliberately stays on the readable body stack, not monospace — the
+  readers are students with language needs. Chrome pays the idiom tax; sentences don't.
+- Effects are defeatable: `--fi-scan`, `--fi-glow` and `--fi-rake` all collapse to
+  none/0 under `.a11y-high-contrast` and `.a11y-reduced-motion` / the media query.
+  High contrast stays pure #000/#fff at 21:1. Verified by computed style, not asserted.
+- Chris's verdict: "looks fantastic… we might want to refine and/simplify it a little
+  later as testing begins in earnest." Simplifying is subtractive — nothing to unpick.
+
+## Scene chrome & plate geometry (fixed 2026-07-26)
+
+Three defects found by playing Crack the Safe on an iPad, all fixed in the SHARED
+shell so they apply to every module — none of this was vault-dial-specific:
+
+- **Zoomed HUD is corner-anchored, not a bottom strip.** It used to be a full-width
+  centred strip in the bottom ~23% of the viewport at `z-index: 20` with
+  `pointer-events: auto` children, which covered the lower rows of tall faces and ate
+  their taps. `.scene-zoom-hud` is now a click-through full-viewport layer; only the
+  two corner clusters take pointer events. Hint + the accessible-panel entry sit
+  behind one round expander, collapsed by default.
+- **Zoom distance 1.78 → 2.15** (`zoomPoseFromWorld` in `layout.ts`). Corner-anchoring
+  alone was not enough: at 1.78 the plate filled a portrait iPad, so the viewport
+  corners were still over the face and Step-back landed on the keypad's 7 key.
+- **The plate has a real bezel and no status jewel.** The face used to run to
+  `s + 0.14` against a plate of `s + 0.18` — a 0.02 margin — so screws and the jewel
+  were drawn on the artwork. The jewel is GONE (Chris: "it adds nothing"); screws moved
+  out to `s/2 + 0.055` and the face is `s + 0.05`, clearing the screw heads and no more.
+  Bay state still reads four ways, none colour-only: the amber light pool on the live
+  plate, the FaceGlyph, the `IN OPERATION / PASSED / SEALED / FAILED` legend, and the
+  lockdown bars on a failed plate.
+- The "drag to turn the case · tap the lit module" directions line is **removed**.
+  `scene.spec.ts` used `.scene-hint` as its case-ready sentinel; that wait was
+  redundant with the `.scene-open-btn` wait beside it, which is the real signal.
+
+If the face reads cramped in real hands, the two numbers to tune are `FACE_SIZE` in
+`Faceplate.tsx` and `dist` in `layout.ts`. Tune against hardware, not a simulator.
 
 ## Open threads
 
@@ -151,10 +204,21 @@ Theme = data (`SceneTheme`); active theme persists under `ky-scene-theme`.
 5. Grant path: ASHFoundation Researcher–Practitioner Collaboration Grant ($35k) needs a
    university PI partner and its next cycle is 2027 — lining up a PI is a long-lead item
    worth starting well before the app is "done".
-6. Chris's TickTick list "Say Again? (Therapy Game)" tracks the loose ends.
+6. Chris's TickTick list "Say Again? (Therapy Game)" tracks the loose ends — it is
+   reconciled against this file as of 2026-07-26; keep them in step.
 7. Chris must still get his district's outside-work policy in writing (conflict-of-interest
    risk of piloting his own product on his caseload — lower stakes now that it's free, but
-   not zero).
+   not zero). Do it BEFORE the student playtest generates data worth publishing.
+8. **Refine / simplify the CRT menus** once testing is underway — Chris's own instruction.
+   Watch whether chrome density costs time-to-play, whether the MODULES ON FILE / CASE BAYS
+   / PRE-FLIGHT readouts earn their space, and how scanline banding holds up at classroom
+   brightness on real hardware.
+9. **Unexplained orientation flip.** The iPad simulator has flipped portrait→landscape
+   several times with no deliberate trigger, always on relaunch into an already-running
+   simulator (a cold boot lands portrait). `Info.plist` allows all four iPad orientations
+   so iOS is within its rights, and play continues fine. May be simulator-only — but if it
+   reproduces on real hardware mid-mission it is disruptive with a student holding the
+   case, and locking orientation is a small change. Watch for it in the playtest.
 
 Done and no longer open: the market-research dossier (delivered 2026-07-16; outcome is the
 Strategy section above), and the Pages deploy (verified live 2026-07-24).
