@@ -1,7 +1,7 @@
 # Project State — Say Again?
 
 > Living onboarding digest for anyone (human or Claude session) picking up this repo.
-> Last updated: 2026-07-26 (CRT menus shipped, scene chrome fixed, plate jewel removed).
+> Last updated: 2026-07-31 (manual PDF masters regenerated with real fonts, print-ready).
 > New session? Read `docs/HANDOFF.md` for the short version, then this file.
 
 ## What this is
@@ -100,7 +100,10 @@ npm run build && npx cap sync ios # web bundle -> iOS project
 - Playwright must use chromium explicitly (iPad device presets default to WebKit).
 - Headless GL flags for probes: `--no-sandbox --disable-dev-shm-usage --enable-unsafe-swiftshader`.
 - e2e drives 3D faces via the dev-only `window.__kyFace` hook.
-- Manual PDFs pin CreationDate for byte-determinism.
+- Manual PDFs pin CreationDate for byte-determinism — but only within one rendering
+  environment. Linux containers lack the manual's Georgia/Helvetica stack and silently
+  substitute Liberation/DejaVu (the pre-2026-07-31 committed PDFs were built that way).
+  Render print masters on a Mac; expect a full-binary diff when the environment changes.
 
 ## iOS / Xcode
 
@@ -196,7 +199,12 @@ If the face reads cramped in real hands, the two numbers to tune are `FACE_SIZE`
 ## Open threads
 
 1. Classroom iPad playtest of the in-case faces (the real gate for everything).
-2. Reprint both manual editions (Static Protocol page + 3 new modules added).
+2. Print fresh physical copies of both manual editions. The PDF masters in `manuals/`
+   were regenerated and verified page-by-page 2026-07-31 (standard 54 pp, easy-read
+   63 pp; Static Protocol page + all 10 module chapters in both, real Georgia/Helvetica
+   instead of the old Linux fallback fonts). All that remains is the actual printing.
+   Known content nit for a future pass: the Bad Intel figure prints a doubled caption
+   in both editions (easy-read shows "The four kinds of controls." twice).
 3. Backlog modules from the research shortlist: **Cover Story** (inference from evidence),
    **Double Meaning** (idioms), **Vantage Point** (perspective-taking — pilot for cognitive
    load first).
