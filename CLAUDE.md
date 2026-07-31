@@ -57,7 +57,8 @@ from inside `app/`, not globally, or you get a build-number mismatch.
 
 - Homebrew lives at `/opt/homebrew/bin`, which is only on PATH via `~/.zshrc`.
   Non-interactive shells don't source that, so `gh` may need a full path.
-- Chris runs Claude Code through the **Claude desktop app**, not the terminal CLI — there is
-  no `claude` command on his machines. Don't suggest `cd <dir> && claude`; the working
-  directory is set through the app.
+- Chris runs Claude Code both ways. **Currently primary: the Claude desktop app** (working
+  directory set through the app). The **terminal CLI is now also installed** (`claude`, via
+  Homebrew at `/opt/homebrew/bin/claude`) and he may transition to it — so `cd <dir> && claude`
+  is valid; just don't assume the CLI is the active surface unless the session shows it is.
 - Currently an M1 MacBook Pro; a Mac Studio M3 is becoming the primary dev machine.
