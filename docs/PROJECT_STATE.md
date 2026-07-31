@@ -202,9 +202,8 @@ If the face reads cramped in real hands, the two numbers to tune are `FACE_SIZE`
 2. Print fresh physical copies of both manual editions. The PDF masters in `manuals/`
    were regenerated and verified page-by-page 2026-07-31 (standard 54 pp, easy-read
    63 pp; Static Protocol page + all 10 module chapters in both, real Georgia/Helvetica
-   instead of the old Linux fallback fonts). All that remains is the actual printing.
-   Known content nit for a future pass: the Bad Intel figure prints a doubled caption
-   in both editions (easy-read shows "The four kinds of controls." twice).
+   instead of the old Linux fallback fonts; doubled Bad Intel caption fixed same day).
+   All that remains is the actual printing.
 3. Backlog modules from the research shortlist: **Cover Story** (inference from evidence),
    **Double Meaning** (idioms), **Vantage Point** (perspective-taking — pilot for cognitive
    load first).

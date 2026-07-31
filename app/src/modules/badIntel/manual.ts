@@ -46,10 +46,6 @@ type Edition = 'standard' | 'simplified';
 function controlTable(edition: Edition): ManualBlock {
   return {
     kind: 'table',
-    caption:
-      edition === 'standard'
-        ? 'The four kinds of hardware, as the Agent will describe them.'
-        : 'The four kinds of controls.',
     header: edition === 'standard' ? ['Control', 'How to spot it'] : ['Control', 'What it looks like'],
     rows: CONTROL_TYPES.map((c) => [c.label, edition === 'standard' ? c.standard : c.simplified]),
   };
